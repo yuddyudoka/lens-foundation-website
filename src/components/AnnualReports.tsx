@@ -15,7 +15,7 @@ function AnnualReportCard({ report }: { report: AnnualReportRecord }) {
           <p>{report.description}</p>
           <small>PDF REPORT&nbsp; • &nbsp;PUBLISHED {report.year}</small>
         </div>
-        <a className="button button-primary annual-report-button" href={report.url}>
+        <a className="button button-primary annual-report-button" href={report.url} target="_blank" rel="noreferrer">
           View annual report
         </a>
       </div>
