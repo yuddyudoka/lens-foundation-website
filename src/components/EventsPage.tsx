@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fallbackEvents, loadEvents, type Chapter, type EventFilter, type EventRecord } from "../data/events";
+import { fallbackEvents, filterEvents, loadEvents, type ChapterFilter, type EventFilter, type EventRecord } from "../data/events";
 import { FinalCta } from "./FinalCta";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 
-const chapters: Chapter[] = ["Lagos", "Ghana", "USA", "London"];
+const chapters: { value: ChapterFilter; label: string }[] = [
+  { value: "All", label: "All" },
+  { value: "Lagos", label: "Lagos" },
+  { value: "Ghana", label: "Ghana" },
+  { value: "London", label: "London" },
+  { value: "USA", label: "US" },
+];
 const filters: EventFilter[] = ["All", "Upcoming", "Completed"];
 
 function EventsHero() {
@@ -96,20 +102,40 @@ function StatusFilter({ value, onChange }: { value: EventFilter; onChange: (filt
 }
 
 function EventsListing() {
-  const [chapter, setChapter] = useState<Chapter>("Lagos");
+  const [chapter, setChapter] = useState<ChapterFilter>("All");
   const [status, setStatus] = useState<EventFilter>("All");
   const [events, setEvents] = useState<EventRecord[]>(fallbackEvents);
 
   useEffect(() => {
     let active = true;
-    void loadEvents().then((records) => { if (active) setEvents(records); });
-    return () => { active = false; };
+    const refreshEvents = () => {
+      void loadEvents().then((records) => { if (active) setEvents(records); });
+    };
+    const handleStorageUpdate = (event: StorageEvent) => {
+      if (event.key === "lens-cms-events-v1") refreshEvents();
+    };
+    const handleCmsUpdate = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === "lens-cms-events-v1") refreshEvents();
+    };
+
+    refreshEvents();
+    window.addEventListener("storage", handleStorageUpdate);
+    window.addEventListener("lens-cms-updated", handleCmsUpdate);
+
+    return () => {
+      active = false;
+      window.removeEventListener("storage", handleStorageUpdate);
+      window.removeEventListener("lens-cms-updated", handleCmsUpdate);
+    };
   }, []);
 
+  const chapterEvents = useMemo(
+    () => filterEvents(events, chapter, "All"),
+    [chapter, events],
+  );
+
   const visibleEvents = useMemo(
-    () => events
-      .filter((event) => event.chapter === chapter && (status === "All" || event.status === status))
-      .sort((a, b) => b.dateValue.localeCompare(a.dateValue)),
+    () => filterEvents(events, chapter, status),
     [chapter, events, status],
   );
 
@@ -119,17 +145,17 @@ function EventsListing() {
         <div className="events-page-controls">
           <div className="events-chapter-tabs" role="tablist" aria-label="Event chapters">
             {chapters.map((item) => (
-              <button type="button" role="tab" aria-selected={chapter === item} key={item} onClick={() => setChapter(item)}>{item}</button>
+              <button type="button" role="tab" aria-selected={chapter === item.value} key={item.value} onClick={() => setChapter(item.value)}>{item.label}</button>
             ))}
           </div>
           <StatusFilter value={status} onChange={setStatus} />
         </div>
 
-        {chapter === "Lagos" && visibleEvents.length > 0 ? (
-          <div className="events-page-grid" aria-live="polite" aria-label={`${status} Lagos events`}>
+        {visibleEvents.length > 0 ? (
+          <div className="events-page-grid" aria-live="polite" aria-label={`${status} ${chapter === "All" ? "all chapters" : chapter} events`}>
             {visibleEvents.map((event) => <EventCard key={event.id} event={event} />)}
           </div>
-        ) : chapter === "Lagos" ? <FilteredEventsEmpty status={status} /> : <ChapterComingSoon />}
+        ) : chapter !== "All" && chapterEvents.length === 0 ? <ChapterComingSoon /> : <FilteredEventsEmpty status={status} />}
       </div>
     </section>
   );

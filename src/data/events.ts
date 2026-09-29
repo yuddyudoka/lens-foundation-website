@@ -1,4 +1,5 @@
 export type Chapter = "Lagos" | "Ghana" | "USA" | "London";
+export type ChapterFilter = "All" | Chapter;
 export type EventStatus = "Upcoming" | "Completed";
 export type EventFilter = "All" | EventStatus;
 
@@ -23,6 +24,17 @@ export type EventRecord = {
   href: string;
   details?: EventDetailContent;
 };
+
+export function filterEvents(
+  events: EventRecord[],
+  chapter: ChapterFilter,
+  status: EventFilter,
+): EventRecord[] {
+  return events
+    .filter((event) => chapter === "All" || event.chapter === chapter)
+    .filter((event) => status === "All" || event.status === status)
+    .sort((a, b) => b.dateValue.localeCompare(a.dateValue));
+}
 
 export function getLatestEvents(events: EventRecord[], limit = 6): EventRecord[] {
   const eventTimestamp = (event: EventRecord) => {
