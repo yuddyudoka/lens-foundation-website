@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getSiteImage } from "../data/cms";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 
@@ -43,9 +44,10 @@ function RequiredMark() {
 }
 
 function ContactHero() {
+  const image = getSiteImage("contact-hero");
   return (
     <section className="contact-hero" data-node-id="209:3298" aria-labelledby="contact-page-title">
-      <img className="contact-hero-image" src="/assets/contact-hero.png" alt="Lens Foundation team members standing together" />
+      <img className="contact-hero-image" src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
       <div className="contact-hero-overlay" aria-hidden="true" />
       <div className="content-wrapper contact-hero-content">
         <p>~CONTACT US~</p>

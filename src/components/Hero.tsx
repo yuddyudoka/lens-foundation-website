@@ -1,10 +1,14 @@
+import { getSiteImage } from "../data/cms";
+
 export function Hero() {
+  const image = getSiteImage("home-hero");
   return (
     <section className="hero" aria-labelledby="hero-title" data-node-id="7:136">
       <img
         className="hero-image"
-        src="/assets/hero-team-1.jpg"
-        alt="Members of The Lens Foundation team standing together"
+        src={image.image}
+        alt={image.alt}
+        style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }}
       />
       <div className="hero-overlay" aria-hidden="true" />
 

@@ -1,11 +1,14 @@
+import { useEffect, useRef, useState } from "react";
+import { getSiteImage, getTeamMembers } from "../data/cms";
 import { Footer } from "./Footer";
 import { FinalCta } from "./FinalCta";
 import { Navbar } from "./Navbar";
 
 function AboutHero() {
+  const image = getSiteImage("about-hero");
   return (
     <section className="about-hero" data-node-id="124:64" aria-labelledby="about-page-title">
-      <img className="about-hero-image" src="/assets/events-page-hero.png" alt="Lens Foundation volunteers standing together" />
+      <img className="about-hero-image" src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
       <div className="about-hero-overlay" aria-hidden="true" />
       <div className="content-wrapper about-hero-content">
         <p>~ABOUT US~</p>
@@ -38,6 +41,8 @@ function OurStoryVideo() {
 }
 
 function MissionAndVision() {
+  const missionImage = getSiteImage("about-mission");
+  const visionImage = getSiteImage("about-vision");
   return (
     <section className="about-purpose" data-node-id="139:1715" aria-label="Our mission and vision">
       <div className="content-wrapper about-purpose-layout">
@@ -51,13 +56,13 @@ function MissionAndVision() {
             </p>
           </div>
           <figure className="about-purpose-media">
-            <img src="/assets/impact-outreach.jpg" alt="Lens Foundation volunteers preparing outreach supplies" />
+            <img src={missionImage.image} alt={missionImage.alt} style={{ objectPosition: `${missionImage.focalPoint.x}% ${missionImage.focalPoint.y}%` }} />
           </figure>
         </div>
 
         <div className="about-purpose-row about-purpose-vision">
           <figure className="about-purpose-media">
-            <img src="/assets/impact-community.jpg" alt="Lens Foundation volunteers with school children" />
+            <img src={visionImage.image} alt={visionImage.alt} style={{ objectPosition: `${visionImage.focalPoint.x}% ${visionImage.focalPoint.y}%` }} />
           </figure>
           <div className="about-purpose-copy">
             <h2>Our Vision</h2>
@@ -134,10 +139,11 @@ function CoreValues() {
 }
 
 function FounderMessage() {
+  const image = getSiteImage("about-founder");
   return (
     <section className="about-founder" data-node-id="124:130" aria-labelledby="about-founder-title">
       <div className="content-wrapper about-founder-layout">
-        <img className="about-founder-portrait" src="/assets/team-omobolanle-sodiya.jpg" alt="Omobolanle Sodiya, Founding Director of The Lens Foundation" />
+        <img className="about-founder-portrait" src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
         <div className="about-founder-copy">
           <p className="about-founder-kicker">A message from the founder</p>
           <h2 id="about-founder-title">A shared concern became a promise to serve with compassion</h2>
@@ -189,14 +195,40 @@ function CommunityImpactOrganogram() {
   );
 }
 
-const teamMembers = [
-  { name: "Omobolanle Sodiya", role: "Founding Director", image: "/assets/team-omobolanle-sodiya.jpg" },
-  { name: "Ayobami Johnson", role: "Director of Operations", image: "/assets/team-ayobami-johnson.jpg" },
-  { name: "Joy Dada", role: "Head of Admin", image: "/assets/team-joy-dada.png" },
-  { name: "Michael Gbademu", role: "Team Lead — Volunteers", image: "/assets/team-michael-gbademu.png" },
-];
-
 function OurTeam() {
+  const teamMembers = getTeamMembers();
+  const railRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ active: false, pointerId: 0, startX: 0, scrollLeft: 0 });
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+  const [dragging, setDragging] = useState(false);
+
+  const updateControls = () => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const maximum = Math.max(0, rail.scrollWidth - rail.clientWidth);
+    setAtStart(rail.scrollLeft <= 2);
+    setAtEnd(rail.scrollLeft >= maximum - 2);
+  };
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    rail.scrollLeft = 0;
+    updateControls();
+    const observer = new ResizeObserver(updateControls);
+    observer.observe(rail);
+    return () => observer.disconnect();
+  }, [teamMembers.length]);
+
+  const moveRail = (direction: -1 | 1) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const card = rail.querySelector<HTMLElement>(".about-team-card");
+    const gap = Number.parseFloat(window.getComputedStyle(rail).columnGap) || 20;
+    rail.scrollBy({ left: direction * ((card?.offsetWidth ?? 280) + gap), behavior: "smooth" });
+  };
+
   return (
     <section className="about-team" data-node-id="124:172" aria-labelledby="about-team-title">
       <div className="content-wrapper about-team-layout">
@@ -205,16 +237,49 @@ function OurTeam() {
           <h2 id="about-team-title">Meet our team</h2>
         </header>
 
-        <div className="about-team-grid">
+        <div
+          className={`about-team-grid${dragging ? " is-dragging" : ""}`}
+          ref={railRef}
+          onScroll={updateControls}
+          onPointerDown={(event) => {
+            const rail = railRef.current;
+            if (!rail) return;
+            dragRef.current = { active: true, pointerId: event.pointerId, startX: event.clientX, scrollLeft: rail.scrollLeft };
+            rail.setPointerCapture(event.pointerId);
+            setDragging(true);
+          }}
+          onPointerMove={(event) => {
+            const rail = railRef.current;
+            if (!rail || !dragRef.current.active || dragRef.current.pointerId !== event.pointerId) return;
+            rail.scrollLeft = dragRef.current.scrollLeft - (event.clientX - dragRef.current.startX);
+          }}
+          onPointerUp={(event) => {
+            if (dragRef.current.pointerId !== event.pointerId) return;
+            dragRef.current.active = false;
+            setDragging(false);
+            railRef.current?.releasePointerCapture(event.pointerId);
+            updateControls();
+          }}
+          onPointerCancel={() => { dragRef.current.active = false; setDragging(false); }}
+          aria-label="Team member carousel"
+        >
           {teamMembers.map((member, index) => (
             <article className="about-team-card" key={`${member.name}-${index}`}>
-              <img className="about-team-photo" src={member.image} alt={`${member.name}, ${member.role}`} loading="lazy" />
+              {member.image ? (
+                <img className="about-team-photo" src={member.image} alt={`${member.name}, ${member.role}`} loading="lazy" draggable="false" style={{ objectPosition: `${member.focalPoint.x}% ${member.focalPoint.y}%` }} />
+              ) : (
+                <div className="about-team-photo about-team-photo-placeholder" aria-hidden="true"><span>LF</span></div>
+              )}
               <div className="about-team-info">
                 <h3>{member.name}</h3>
                 <p>{member.role}</p>
               </div>
             </article>
           ))}
+        </div>
+        <div className="about-team-controls" aria-label="Team carousel controls">
+          <button type="button" onClick={() => moveRail(-1)} disabled={atStart} aria-label="Previous team members"><img className="about-team-arrow-previous" src="/assets/event-arrow-active.svg" alt="" /></button>
+          <button type="button" onClick={() => moveRail(1)} disabled={atEnd} aria-label="Next team members"><img src="/assets/event-arrow-active.svg" alt="" /></button>
         </div>
       </div>
     </section>

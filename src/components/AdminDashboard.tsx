@@ -15,6 +15,7 @@ import {
   Sparkle,
   SignOut,
   UploadSimple,
+  UsersThree,
   X,
 } from "@phosphor-icons/react";
 import { fallbackEvents, getEventDetails, loadEvents, type EventRecord, type EventStatus } from "../data/events";
@@ -22,20 +23,29 @@ import {
   getAnnualReports,
   getFaqs,
   getTestimonials,
+  getSiteImages,
+  getTeamMembers,
   saveAnnualReports,
   saveFaqs,
   saveLocalEvents,
   saveTestimonials,
+  saveSiteImages,
+  saveTeamMembers,
   type AnnualReportRecord,
   type FaqRecord,
   type TestimonialRecord,
+  type FocalPoint,
+  type SiteImageRecord,
+  type SiteImagePage,
+  type TeamMemberRecord,
 } from "../data/cms";
 
-type Section = "overview" | "events" | "reports" | "testimonials" | "faqs";
+type Section = "overview" | "events" | "reports" | "testimonials" | "team" | "media" | "faqs";
 type Editor =
   | { kind: "event"; item: EventRecord }
   | { kind: "report"; item: AnnualReportRecord }
   | { kind: "testimonial"; item: TestimonialRecord }
+  | { kind: "team"; item: TeamMemberRecord }
   | { kind: "faq"; item: FaqRecord }
   | null;
 
@@ -44,6 +54,8 @@ const navItems: { id: Section; label: string; icon: typeof House }[] = [
   { id: "events", label: "Events", icon: CalendarDots },
   { id: "reports", label: "Annual reports", icon: FileText },
   { id: "testimonials", label: "Testimonials", icon: Quotes },
+  { id: "team", label: "Team", icon: UsersThree },
+  { id: "media", label: "Page images", icon: ImageSquare },
   { id: "faqs", label: "FAQs", icon: Question },
 ];
 
@@ -71,13 +83,14 @@ function blankEvent(): EventRecord {
     status: "Upcoming",
     chapter: "Lagos",
     image: "",
+    imageFocalPoint: { x: 50, y: 50 },
     href: "",
     details: { summary: "", overview: "", expectations: [""], whyAttend: "" },
   };
 }
 
 const blankReport = (): AnnualReportRecord => ({ id: "", year: String(new Date().getFullYear()), title: "", description: "", url: "", status: "Draft" });
-const blankTestimonial = (): TestimonialRecord => ({ id: "", quote: "", name: "", role: "", image: "", status: "Draft" });
+const blankTestimonial = (): TestimonialRecord => ({ id: "", quote: "", name: "", role: "", image: "", focalPoint: { x: 50, y: 50 }, status: "Draft" });
 const blankFaq = (): FaqRecord => ({ id: "", question: "", answer: "", status: "Draft" });
 
 export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
@@ -85,6 +98,8 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [events, setEvents] = useState<EventRecord[]>(fallbackEvents);
   const [reports, setReports] = useState(getAnnualReports);
   const [testimonials, setTestimonials] = useState(getTestimonials);
+  const [teamMembers, setTeamMembers] = useState(getTeamMembers);
+  const [siteImages, setSiteImages] = useState(getSiteImages);
   const [faqs, setFaqs] = useState(getFaqs);
   const [query, setQuery] = useState("");
   const [eventFilter, setEventFilter] = useState<"All" | EventStatus>("All");
@@ -99,7 +114,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  const counts = { events: events.length, reports: reports.length, testimonials: testimonials.length, faqs: faqs.length };
+  const counts = { events: events.length, reports: reports.length, testimonials: testimonials.length, team: teamMembers.length, media: siteImages.length, faqs: faqs.length };
   const publishedCount = reports.filter((item) => item.status === "Published").length + testimonials.filter((item) => item.status === "Published").length + faqs.filter((item) => item.status === "Published").length + events.length;
   const upcomingCount = events.filter((item) => item.status === "Upcoming").length;
   const q = query.trim().toLowerCase();
@@ -118,6 +133,8 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   function persistEvents(next: EventRecord[]) { setEvents(next); saveLocalEvents(next); setNotice("Events updated on the website."); }
   function persistReports(next: AnnualReportRecord[]) { const normalized = saveAnnualReports(next); setReports(normalized); setNotice("Annual reports updated. Only the three newest published years appear on the homepage."); }
   function persistTestimonials(next: TestimonialRecord[]) { setTestimonials(next); saveTestimonials(next); setNotice("Testimonials updated on the website."); }
+  function persistTeam(next: TeamMemberRecord[]) { setTeamMembers(next); saveTeamMembers(next); setNotice("Team section updated on the website."); }
+  function persistSiteImages(next: SiteImageRecord[]) { setSiteImages(next); saveSiteImages(next); setNotice("Page imagery updated on the website."); }
   function persistFaqs(next: FaqRecord[]) { setFaqs(next); saveFaqs(next); setNotice("FAQs updated on the website."); }
 
   function deleteItem(kind: Exclude<Editor, null>["kind"], id: string) {
@@ -193,6 +210,34 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     return <><CollectionHeading eyebrow="Stories collection" title="Testimonials" description="Review the community stories that appear in the homepage carousel." action="Add testimonial" onAction={() => setEditor({ kind: "testimonial", item: blankTestimonial() })} /><div className="admin-toolbar"><SearchBox query={query} setQuery={setQuery} label="Search testimonials" /></div><div className="admin-card-grid">{items.map((item) => <article className="admin-content-card" key={item.id}><div className="admin-content-card-person"><img src={item.image} alt="" /><span><strong>{item.name}</strong><small>{item.role}</small></span><em className={`admin-status ${item.status.toLowerCase()}`}>{item.status}</em></div><p>“{item.quote}”</p><div><button onClick={() => setEditor({ kind: "testimonial", item })}>Edit</button><button className="danger" onClick={() => deleteItem("testimonial", item.id)}>Delete</button></div></article>)}</div></>;
   }
 
+  function renderTeam() {
+    const items = teamMembers.filter((item) => !q || `${item.name} ${item.role}`.toLowerCase().includes(q));
+    return <><CollectionHeading eyebrow="About Us collection" title="Team" description="Manage the six team profiles shown in the draggable About Us carousel." action="View About Us" onAction={() => window.open("/about#about-team-title", "_blank", "noopener,noreferrer")} /><div className="admin-toolbar"><SearchBox query={query} setQuery={setQuery} label="Search team members" /></div><div className="admin-card-grid admin-team-card-grid">{items.map((item) => <article className="admin-content-card admin-team-card" key={item.id}><div className="admin-team-card-person">{item.image ? <img src={item.image} alt="" style={{ objectPosition: `${item.focalPoint.x}% ${item.focalPoint.y}%` }} /> : <span className="admin-team-placeholder">LF</span>}<div><strong>{item.name}</strong><small>{item.role}</small></div></div><div><button onClick={() => setEditor({ kind: "team", item })}>Edit profile</button></div></article>)}</div></>;
+  }
+
+  function renderMedia() {
+    const pages: SiteImagePage[] = ["Home", "About Us", "Events", "Lens Podium", "Volunteer", "Partner", "Contact Us"];
+    const updateImage = (id: string, patch: Partial<SiteImageRecord>) => {
+      persistSiteImages(siteImages.map((record) => record.id === id ? { ...record, ...patch } : record));
+    };
+    return <>
+      <div className="admin-page-heading"><div><p>Website media</p><h1>Page images</h1><span>Replace content photography and choose the visible focal point for each responsive crop. Decorative artwork, icons, the organogram, event cards, testimonials, and team profiles are managed elsewhere or remain code-controlled.</span></div></div>
+      <div className="admin-media-pages">
+        {pages.map((page) => {
+          const items = siteImages.filter((record) => record.page === page);
+          return <section className="admin-media-page" key={page} aria-labelledby={`admin-media-${slugify(page)}`}>
+            <header><div><h2 id={`admin-media-${slugify(page)}`}>{page}</h2><p>{items.length} editable {items.length === 1 ? "image" : "images"}</p></div><a href={page === "Home" ? "/" : page === "About Us" ? "/about" : page === "Events" ? "/events" : page === "Lens Podium" ? "/lens-podium" : `/${page.toLowerCase().replace(" us", "").replace(" ", "-")}`} target="_blank" rel="noreferrer">View page <ArrowSquareOut size={16} /></a></header>
+            <div className="admin-media-grid">{items.map((record) => <article className="admin-media-card" key={record.id}>
+              <div className="admin-media-card-copy"><h3>{record.label}</h3><p>{record.description}</p></div>
+              <ImageUploadField label="Image" value={record.image} aspect={record.aspect === "square" ? "square" : "landscape"} focalPoint={record.focalPoint} onFocalPointChange={(focalPoint) => updateImage(record.id, { focalPoint })} onChange={(image) => updateImage(record.id, { image })} />
+              <label className="admin-media-alt"><span>Alternative text</span><input value={record.alt} onChange={(event) => updateImage(record.id, { alt: event.target.value })} /></label>
+            </article>)}</div>
+          </section>;
+        })}
+      </div>
+    </>;
+  }
+
   function renderFaqs() {
     const items = faqs.filter((item) => !q || `${item.question} ${item.answer}`.toLowerCase().includes(q));
     return <><CollectionHeading eyebrow="Support collection" title="FAQs" description="Keep common questions and answers useful, current and easy to understand." action="Add FAQ" onAction={() => setEditor({ kind: "faq", item: blankFaq() })} /><div className="admin-toolbar"><SearchBox query={query} setQuery={setQuery} label="Search FAQs" /></div><div className="admin-faq-list">{items.map((item, index) => <article key={item.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{item.question}</strong><p>{item.answer}</p></div><em className={`admin-status ${item.status.toLowerCase()}`}>{item.status}</em><div className="admin-row-actions"><button onClick={() => setEditor({ kind: "faq", item })}>Edit</button><button className="danger" onClick={() => deleteItem("faq", item.id)}>Delete</button></div></article>)}</div></>;
@@ -208,9 +253,9 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
       {menuOpen && <button className="admin-menu-scrim" aria-label="Close menu" onClick={() => setMenuOpen(false)} />}
       <div className="admin-workspace">
         <header className="admin-topbar"><button className="admin-menu-button" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><List size={24} /></button><span>{navItems.find((item) => item.id === section)?.label}</span><a href="/" target="_blank" rel="noreferrer">View website <ArrowSquareOut size={18} /></a></header>
-        <main className="admin-content">{section === "overview" ? renderOverview() : section === "events" ? renderEvents() : section === "reports" ? renderReports() : section === "testimonials" ? renderTestimonials() : renderFaqs()}</main>
+        <main className="admin-content">{section === "overview" ? renderOverview() : section === "events" ? renderEvents() : section === "reports" ? renderReports() : section === "testimonials" ? renderTestimonials() : section === "team" ? renderTeam() : section === "media" ? renderMedia() : renderFaqs()}</main>
       </div>
-      {editor && <EditorModal editor={editor} events={events} reports={reports} testimonials={testimonials} faqs={faqs} close={() => setEditor(null)} saveEvent={(item) => { persistEvents(events.some((record) => record.id === item.id) ? events.map((record) => record.id === item.id ? item : record) : [item, ...events]); setEditor(null); }} saveReport={(item) => { persistReports(reports.some((record) => record.id === item.id) ? reports.map((record) => record.id === item.id ? item : record) : [item, ...reports]); setEditor(null); }} saveTestimonial={(item) => { persistTestimonials(testimonials.some((record) => record.id === item.id) ? testimonials.map((record) => record.id === item.id ? item : record) : [item, ...testimonials]); setEditor(null); }} saveFaq={(item) => { persistFaqs(faqs.some((record) => record.id === item.id) ? faqs.map((record) => record.id === item.id ? item : record) : [item, ...faqs]); setEditor(null); }} />}
+      {editor && <EditorModal editor={editor} events={events} reports={reports} testimonials={testimonials} faqs={faqs} close={() => setEditor(null)} saveEvent={(item) => { persistEvents(events.some((record) => record.id === item.id) ? events.map((record) => record.id === item.id ? item : record) : [item, ...events]); setEditor(null); }} saveReport={(item) => { persistReports(reports.some((record) => record.id === item.id) ? reports.map((record) => record.id === item.id ? item : record) : [item, ...reports]); setEditor(null); }} saveTestimonial={(item) => { persistTestimonials(testimonials.some((record) => record.id === item.id) ? testimonials.map((record) => record.id === item.id ? item : record) : [item, ...testimonials]); setEditor(null); }} saveTeam={(item) => { persistTeam(teamMembers.map((record) => record.id === item.id ? item : record)); setEditor(null); }} saveFaq={(item) => { persistFaqs(faqs.some((record) => record.id === item.id) ? faqs.map((record) => record.id === item.id ? item : record) : [item, ...faqs]); setEditor(null); }} />}
       {notice && <div className="admin-notice" role="status"><Check size={18} weight="bold" />{notice}</div>}
     </div>
   );
@@ -230,7 +275,7 @@ function ContentCard({ title, meta, status, href, onEdit, onDelete }: { title: s
 
 function EmptyState({ title, description }: { title: string; description: string }) { return <div className="admin-empty"><MagnifyingGlass size={28} /><strong>{title}</strong><span>{description}</span></div>; }
 
-function EditorModal({ editor, close, saveEvent, saveReport, saveTestimonial, saveFaq }: { editor: Exclude<Editor, null>; events: EventRecord[]; reports: AnnualReportRecord[]; testimonials: TestimonialRecord[]; faqs: FaqRecord[]; close: () => void; saveEvent: (item: EventRecord) => void; saveReport: (item: AnnualReportRecord) => void; saveTestimonial: (item: TestimonialRecord) => void; saveFaq: (item: FaqRecord) => void }) {
+function EditorModal({ editor, close, saveEvent, saveReport, saveTestimonial, saveTeam, saveFaq }: { editor: Exclude<Editor, null>; events: EventRecord[]; reports: AnnualReportRecord[]; testimonials: TestimonialRecord[]; faqs: FaqRecord[]; close: () => void; saveEvent: (item: EventRecord) => void; saveReport: (item: AnnualReportRecord) => void; saveTestimonial: (item: TestimonialRecord) => void; saveTeam: (item: TeamMemberRecord) => void; saveFaq: (item: FaqRecord) => void }) {
   const [item, setItem] = useState(editor.item);
   const [generating, setGenerating] = useState(false);
   const [generationError, setGenerationError] = useState("");
@@ -242,6 +287,7 @@ function EditorModal({ editor, close, saveEvent, saveReport, saveTestimonial, sa
     if (editor.kind === "event") { const value = item as EventRecord; const id = value.id || slugify(value.title); saveEvent({ ...value, id, href: `/events/${id}`, date: displayDate(value.dateValue), createdAt: value.createdAt || new Date().toISOString() }); }
     if (editor.kind === "report") { const value = item as AnnualReportRecord; saveReport({ ...value, id: value.id || `report-${slugify(value.year || value.title)}` }); }
     if (editor.kind === "testimonial") { const value = item as TestimonialRecord; saveTestimonial({ ...value, id: value.id || slugify(value.name) }); }
+    if (editor.kind === "team") saveTeam(item as TeamMemberRecord);
     if (editor.kind === "faq") { const value = item as FaqRecord; saveFaq({ ...value, id: value.id || slugify(value.question) }); }
   }
 
@@ -297,6 +343,7 @@ function EditorModal({ editor, close, saveEvent, saveReport, saveTestimonial, sa
     {editor.kind === "event" && <EventFields item={item as EventRecord} setItem={(value) => setItem(value)} />}
     {editor.kind === "report" && <ReportFields item={item as AnnualReportRecord} setItem={(value) => setItem(value)} />}
     {editor.kind === "testimonial" && <TestimonialFields item={item as TestimonialRecord} setItem={(value) => setItem(value)} />}
+    {editor.kind === "team" && <TeamFields item={item as TeamMemberRecord} setItem={(value) => setItem(value)} />}
     {editor.kind === "faq" && <FaqFields item={item as FaqRecord} setItem={(value) => setItem(value)} />}
     <footer><button type="button" onClick={close}>Cancel</button><button className="admin-primary-action" type="submit">{isNew ? "Publish content" : "Save changes"}</button></footer>
   </form></section></div>;
@@ -336,7 +383,7 @@ async function optimizeUploadedImage(file: File) {
   }
 }
 
-function ImageUploadField({ label, value, onChange, aspect = "landscape" }: { label: string; value: string; onChange: (value: string) => void; aspect?: "landscape" | "square" }) {
+function ImageUploadField({ label, value, onChange, aspect = "landscape", focalPoint, onFocalPointChange }: { label: string; value: string; onChange: (value: string) => void; aspect?: "landscape" | "square"; focalPoint?: FocalPoint; onFocalPointChange?: (value: FocalPoint) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -356,22 +403,29 @@ function ImageUploadField({ label, value, onChange, aspect = "landscape" }: { la
   return <div className="admin-image-upload">
     <span>{label}</span>
     <button className={`admin-image-upload-zone ${value ? "has-image" : ""}`} type="button" onClick={() => inputRef.current?.click()} disabled={processing}>
-      {value ? <img className={aspect} src={value} alt="Selected upload preview" /> : <span className="admin-image-upload-placeholder"><ImageSquare size={28} /><strong>Choose an image</strong></span>}
+      {value ? <img className={aspect} src={value} alt="Selected upload preview" style={{ objectPosition: `${focalPoint?.x ?? 50}% ${focalPoint?.y ?? 50}%` }} /> : <span className="admin-image-upload-placeholder"><ImageSquare size={28} /><strong>Choose an image</strong></span>}
       <span className="admin-image-upload-action"><UploadSimple size={18} weight="bold" />{processing ? "Optimizing…" : value ? "Replace image" : "Upload image"}</span>
     </button>
     <input ref={inputRef} className="sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required={!value} onChange={(event) => void chooseImage(event.target.files?.[0])} />
     <small>PNG, JPG, WEBP or GIF. Maximum file size: 5 MB.</small>
+    {focalPoint && onFocalPointChange && <div className="admin-focal-controls">
+      <div><strong>Focal point</strong><span>{Math.round(focalPoint.x)}% horizontal · {Math.round(focalPoint.y)}% vertical</span></div>
+      <label><span>Horizontal</span><input aria-label={`${label} horizontal focal point`} type="range" min="0" max="100" value={focalPoint.x} onChange={(event) => onFocalPointChange({ ...focalPoint, x: Number(event.target.value) })} /></label>
+      <label><span>Vertical</span><input aria-label={`${label} vertical focal point`} type="range" min="0" max="100" value={focalPoint.y} onChange={(event) => onFocalPointChange({ ...focalPoint, y: Number(event.target.value) })} /></label>
+    </div>}
     {error && <small className="admin-image-upload-error" role="alert">{error}</small>}
   </div>;
 }
 
 function EventFields({ item, setItem }: { item: EventRecord; setItem: (item: EventRecord) => void }) {
   const details = item.details ?? { summary: "", overview: "", expectations: [""], whyAttend: "" };
-  return <div className="admin-form-grid"><Field label="Event title" wide><input required value={item.title} onChange={(e) => setItem({ ...item, title: e.target.value })} /></Field><Field label="Date"><input required type="date" value={item.dateValue} onChange={(e) => setItem({ ...item, dateValue: e.target.value })} /></Field><Field label="Status"><BrandedSelect label="Event status" value={item.status} options={["Upcoming", "Completed"] as const} onChange={(status) => setItem({ ...item, status })} /></Field><Field label="Chapter"><BrandedSelect label="Event chapter" value={item.chapter} options={["Lagos", "Ghana", "USA", "London"] as const} onChange={(chapter) => setItem({ ...item, chapter })} /></Field><Field label="Location"><input required value={item.location} onChange={(e) => setItem({ ...item, location: e.target.value })} /></Field><div className="wide"><ImageUploadField label="Event card image" value={item.image} onChange={(image) => setItem({ ...item, image })} /></div><Field label="Card summary" wide><textarea required rows={3} value={details.summary} onChange={(e) => setItem({ ...item, details: { ...details, summary: e.target.value } })} /></Field><Field label="Event overview" wide><textarea required rows={5} value={details.overview} onChange={(e) => setItem({ ...item, details: { ...details, overview: e.target.value } })} /></Field><Field label={item.status === "Upcoming" ? "What to expect (one item per line)" : "What happened (one item per line)"} wide><textarea required rows={4} value={details.expectations.join("\n")} onChange={(e) => setItem({ ...item, details: { ...details, expectations: e.target.value.split("\n") } })} /></Field><Field label={item.status === "Upcoming" ? "Why attend?" : "Impact statement"} wide><textarea required rows={4} value={details.whyAttend} onChange={(e) => setItem({ ...item, details: { ...details, whyAttend: e.target.value } })} /></Field></div>;
+  return <div className="admin-form-grid"><Field label="Event title" wide><input required value={item.title} onChange={(e) => setItem({ ...item, title: e.target.value })} /></Field><Field label="Date"><input required type="date" value={item.dateValue} onChange={(e) => setItem({ ...item, dateValue: e.target.value })} /></Field><Field label="Status"><BrandedSelect label="Event status" value={item.status} options={["Upcoming", "Completed"] as const} onChange={(status) => setItem({ ...item, status })} /></Field><Field label="Chapter"><BrandedSelect label="Event chapter" value={item.chapter} options={["Lagos", "Ghana", "USA", "London"] as const} onChange={(chapter) => setItem({ ...item, chapter })} /></Field><Field label="Location"><input required value={item.location} onChange={(e) => setItem({ ...item, location: e.target.value })} /></Field><div className="wide"><ImageUploadField label="Event card image" value={item.image} focalPoint={item.imageFocalPoint ?? { x: 50, y: 50 }} onFocalPointChange={(imageFocalPoint) => setItem({ ...item, imageFocalPoint })} onChange={(image) => setItem({ ...item, image })} /></div><Field label="Card summary" wide><textarea required rows={3} value={details.summary} onChange={(e) => setItem({ ...item, details: { ...details, summary: e.target.value } })} /></Field><Field label="Event overview" wide><textarea required rows={5} value={details.overview} onChange={(e) => setItem({ ...item, details: { ...details, overview: e.target.value } })} /></Field><Field label={item.status === "Upcoming" ? "What to expect (one item per line)" : "What happened (one item per line)"} wide><textarea required rows={4} value={details.expectations.join("\n")} onChange={(e) => setItem({ ...item, details: { ...details, expectations: e.target.value.split("\n") } })} /></Field><Field label={item.status === "Upcoming" ? "Why attend?" : "Impact statement"} wide><textarea required rows={4} value={details.whyAttend} onChange={(e) => setItem({ ...item, details: { ...details, whyAttend: e.target.value } })} /></Field></div>;
 }
 
 function ReportFields({ item, setItem }: { item: AnnualReportRecord; setItem: (item: AnnualReportRecord) => void }) { return <div className="admin-form-grid"><Field label="Year"><input required value={item.year} onChange={(e) => setItem({ ...item, year: e.target.value })} /></Field><Field label="Status"><BrandedSelect label="Report status" value={item.status} options={["Draft", "Published"] as const} onChange={(status) => setItem({ ...item, status })} /></Field><Field label="Report title" wide><input required value={item.title} onChange={(e) => setItem({ ...item, title: e.target.value })} /></Field><Field label="Description" wide><textarea required rows={4} value={item.description} onChange={(e) => setItem({ ...item, description: e.target.value })} /></Field><Field label="PDF path or URL" wide><input required value={item.url} onChange={(e) => setItem({ ...item, url: e.target.value })} /></Field></div>; }
 
-function TestimonialFields({ item, setItem }: { item: TestimonialRecord; setItem: (item: TestimonialRecord) => void }) { return <div className="admin-form-grid"><Field label="Name"><input required value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} /></Field><Field label="Role"><input required value={item.role} onChange={(e) => setItem({ ...item, role: e.target.value })} /></Field><Field label="Status"><BrandedSelect label="Testimonial status" value={item.status} options={["Draft", "Published"] as const} onChange={(status) => setItem({ ...item, status })} /></Field><div><ImageUploadField label="Avatar image" value={item.image} aspect="square" onChange={(image) => setItem({ ...item, image })} /></div><Field label="Testimonial" wide><textarea required rows={6} value={item.quote} onChange={(e) => setItem({ ...item, quote: e.target.value })} /></Field></div>; }
+function TestimonialFields({ item, setItem }: { item: TestimonialRecord; setItem: (item: TestimonialRecord) => void }) { return <div className="admin-form-grid"><Field label="Name"><input required value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} /></Field><Field label="Role"><input required value={item.role} onChange={(e) => setItem({ ...item, role: e.target.value })} /></Field><Field label="Status"><BrandedSelect label="Testimonial status" value={item.status} options={["Draft", "Published"] as const} onChange={(status) => setItem({ ...item, status })} /></Field><div><ImageUploadField label="Avatar image" value={item.image} aspect="square" focalPoint={item.focalPoint ?? { x: 50, y: 50 }} onFocalPointChange={(focalPoint) => setItem({ ...item, focalPoint })} onChange={(image) => setItem({ ...item, image })} /></div><Field label="Testimonial" wide><textarea required rows={6} value={item.quote} onChange={(e) => setItem({ ...item, quote: e.target.value })} /></Field></div>; }
+
+function TeamFields({ item, setItem }: { item: TeamMemberRecord; setItem: (item: TeamMemberRecord) => void }) { return <div className="admin-form-grid"><Field label="Full name"><input required value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} /></Field><Field label="Role"><input required value={item.role} onChange={(e) => setItem({ ...item, role: e.target.value })} /></Field><div className="wide"><ImageUploadField label="Team portrait" value={item.image} aspect="square" focalPoint={item.focalPoint} onFocalPointChange={(focalPoint) => setItem({ ...item, focalPoint })} onChange={(image) => setItem({ ...item, image })} /></div></div>; }
 
 function FaqFields({ item, setItem }: { item: FaqRecord; setItem: (item: FaqRecord) => void }) { return <div className="admin-form-grid"><Field label="Status"><BrandedSelect label="FAQ status" value={item.status} options={["Draft", "Published"] as const} onChange={(status) => setItem({ ...item, status })} /></Field><Field label="Question" wide><input required value={item.question} onChange={(e) => setItem({ ...item, question: e.target.value })} /></Field><Field label="Answer" wide><textarea required rows={7} value={item.answer} onChange={(e) => setItem({ ...item, answer: e.target.value })} /></Field></div>; }

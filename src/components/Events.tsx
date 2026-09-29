@@ -4,7 +4,7 @@ import { fallbackEvents, getLatestEvents, loadEvents, type EventRecord } from ".
 function EventCard({ event }: { event: EventRecord }) {
   return (
     <a className="event-card" href={event.href} aria-label={`View ${event.title}`}>
-      <img className="event-card-image" src={event.image} alt={`${event.title} flyer`} />
+      <img className="event-card-image" src={event.image} alt={`${event.title} flyer`} style={{ objectPosition: `${event.imageFocalPoint?.x ?? 50}% ${event.imageFocalPoint?.y ?? 50}%` }} />
       <span className="event-status" data-status={event.status.toLowerCase()}>
         <img src={event.status === "Upcoming" ? "/assets/event-status-upcoming-dot.svg" : "/assets/event-status-completed-dot.svg"} alt="" />
         {event.status}

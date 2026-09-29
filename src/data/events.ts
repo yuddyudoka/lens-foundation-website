@@ -21,6 +21,7 @@ export type EventRecord = {
   status: EventStatus;
   chapter: Chapter;
   image: string;
+  imageFocalPoint?: { x: number; y: number };
   href: string;
   details?: EventDetailContent;
 };

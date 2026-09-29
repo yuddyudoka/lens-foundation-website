@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getSiteImage } from "../data/cms";
 import { fallbackEvents, filterEvents, loadEvents, type ChapterFilter, type EventFilter, type EventRecord } from "../data/events";
 import { FinalCta } from "./FinalCta";
 import { Footer } from "./Footer";
@@ -14,9 +15,10 @@ const chapters: { value: ChapterFilter; label: string }[] = [
 const filters: EventFilter[] = ["All", "Upcoming", "Completed"];
 
 function EventsHero() {
+  const image = getSiteImage("events-hero");
   return (
     <section className="events-page-hero" data-node-id="464:2211" aria-labelledby="events-page-title">
-      <img src="/assets/events-page-hero.png" alt="Lens Foundation team members gathered at a community event" />
+      <img src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
       <div className="events-page-hero-overlay" aria-hidden="true" />
       <div className="content-wrapper events-page-hero-content">
         <p>~EVENTS~</p>
@@ -29,7 +31,7 @@ function EventsHero() {
 function EventCard({ event }: { event: EventRecord }) {
   return (
     <a className="event-card" href={event.href} aria-label={`View ${event.title}`}>
-      <img className="event-card-image" src={event.image} alt={`${event.title} flyer`} />
+      <img className="event-card-image" src={event.image} alt={`${event.title} flyer`} style={{ objectPosition: `${event.imageFocalPoint?.x ?? 50}% ${event.imageFocalPoint?.y ?? 50}%` }} />
       <span className="event-status" data-status={event.status.toLowerCase()}>
         <img src={event.status === "Upcoming" ? "/assets/event-status-upcoming-dot.svg" : "/assets/event-status-completed-dot.svg"} alt="" />
         {event.status}

@@ -1,4 +1,5 @@
 import { Hand, Lightbulb, Target } from "@phosphor-icons/react";
+import { getSiteImage } from "../data/cms";
 import { FinalCta } from "./FinalCta";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
@@ -73,12 +74,14 @@ function ProgrammeOverview() {
 }
 
 function ProgrammeDetails() {
+  const skillsImage = getSiteImage("podium-skills");
+  const trainingImage = getSiteImage("podium-training");
   return (
     <section className="podium-details" data-node-id="509:1602" aria-label="Programme outcomes and training format">
       <div className="podium-detail-band podium-detail-band-soft">
         <div className="content-wrapper podium-detail-row">
           <div className="podium-visual podium-visual-flyer">
-            <img src="/assets/podium-skills.png" alt="Teens public speaking and sign language bootcamp programme artwork" />
+            <img src={skillsImage.image} alt={skillsImage.alt} style={{ objectPosition: `${skillsImage.focalPoint.x}% ${skillsImage.focalPoint.y}%` }} />
           </div>
           <div className="podium-detail-copy">
             <p className="podium-eyebrow">What Participants Will Gain</p>
@@ -105,7 +108,7 @@ function ProgrammeDetails() {
             </dl>
           </div>
           <div className="podium-visual podium-visual-training">
-            <img src="/assets/podium-training.png" alt="Lens the Podium communication and leadership word cloud" />
+            <img src={trainingImage.image} alt={trainingImage.alt} style={{ objectPosition: `${trainingImage.focalPoint.x}% ${trainingImage.focalPoint.y}%` }} />
           </div>
         </div>
       </div>
@@ -114,10 +117,11 @@ function ProgrammeDetails() {
 }
 
 function InclusiveSection() {
+  const image = getSiteImage("podium-inclusive");
   return (
     <section className="podium-inclusive" data-node-id="246:1337" aria-labelledby="podium-inclusive-title">
       <div className="content-wrapper podium-inclusive-layout">
-        <img src="/assets/podium-inclusive.png" alt="Lens the Podium raised-fist microphone logo" />
+        <img src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
         <div className="podium-inclusive-copy">
           <h2 id="podium-inclusive-title">Every young voice deserves room to grow.</h2>
           <p>LENS the Podium creates a supportive platform where teenagers discover, shape, and project their voices without fear. Each participant learns to communicate with confidence, lead with purpose, and inspire change.</p>

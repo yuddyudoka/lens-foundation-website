@@ -5,6 +5,8 @@ const avatars = [
 ];
 
 export function Impact() {
+  const communityImage = getSiteImage("home-impact-community");
+  const outreachImage = getSiteImage("home-impact-outreach");
   return (
     <section className="impact" aria-labelledby="impact-title" data-node-id="25:563">
       <div className="content-wrapper impact-layout">
@@ -53,12 +55,12 @@ export function Impact() {
             </article>
 
             <figure className="impact-card impact-photo-card">
-              <img src="/assets/impact-community.jpg" alt="Lens Foundation team members with children in the community" />
+              <img src={communityImage.image} alt={communityImage.alt} style={{ objectPosition: `${communityImage.focalPoint.x}% ${communityImage.focalPoint.y}%` }} />
             </figure>
           </div>
 
           <article className="impact-feature-card">
-            <img src="/assets/impact-outreach.jpg" alt="Lens Foundation volunteers preparing supplies during an outreach" />
+            <img src={outreachImage.image} alt={outreachImage.alt} style={{ objectPosition: `${outreachImage.focalPoint.x}% ${outreachImage.focalPoint.y}%` }} />
             <div className="impact-feature-copy">
               <strong>₦450K</strong>
               <h3>Direct Street Support</h3>
@@ -70,3 +72,4 @@ export function Impact() {
     </section>
   );
 }
+import { getSiteImage } from "../data/cms";

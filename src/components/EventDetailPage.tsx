@@ -47,6 +47,7 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
                   className="event-detail-feature-image"
                   src={details.image ?? event.image}
                   alt={`${event.title} flyer`}
+                  style={{ objectPosition: `${event.imageFocalPoint?.x ?? 50}% ${event.imageFocalPoint?.y ?? 50}%` }}
                 />
               </div>
 

@@ -15,7 +15,31 @@ export type TestimonialRecord = {
   name: string;
   role: string;
   image: string;
+  focalPoint?: FocalPoint;
   status: "Published" | "Draft";
+};
+
+export type FocalPoint = { x: number; y: number };
+
+export type SiteImagePage = "Home" | "About Us" | "Events" | "Lens Podium" | "Volunteer" | "Partner" | "Contact Us";
+
+export type SiteImageRecord = {
+  id: string;
+  page: SiteImagePage;
+  label: string;
+  description: string;
+  image: string;
+  alt: string;
+  focalPoint: FocalPoint;
+  aspect: "landscape" | "portrait" | "square";
+};
+
+export type TeamMemberRecord = {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  focalPoint: FocalPoint;
 };
 
 export type FaqRecord = {
@@ -39,6 +63,33 @@ export const defaultTestimonials: TestimonialRecord[] = [
   { id: "kemi-adesola", quote: "What stands out about Lens Foundation is their willingness to show up. They listen, understand what people actually need, and take practical action to help.", name: "Kemi Adesola", role: "Community Partner", image: "/assets/testimonial-kemi-v2.png", status: "Published" },
 ];
 
+export const defaultSiteImages: SiteImageRecord[] = [
+  { id: "home-hero", page: "Home", label: "Homepage hero", description: "Main image behind the homepage introduction.", image: "/assets/hero-team-1.jpg", alt: "Members of The Lens Foundation team standing together", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "home-impact-community", page: "Home", label: "Impact — community", description: "Community photograph in the Our Impact section.", image: "/assets/impact-community.jpg", alt: "Lens Foundation team members with children in the community", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "home-impact-outreach", page: "Home", label: "Impact — outreach", description: "Outreach photograph in the featured impact card.", image: "/assets/impact-outreach.jpg", alt: "Lens Foundation volunteers preparing supplies during an outreach", focalPoint: { x: 50, y: 50 }, aspect: "portrait" },
+  { id: "home-volunteer-cta", page: "Home", label: "Volunteer call-to-action", description: "Background photograph behind the volunteer invitation.", image: "/assets/volunteer-cta-background.png", alt: "Lens Foundation volunteers during a community outreach", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "about-hero", page: "About Us", label: "About Us hero", description: "Main image at the top of the About Us page.", image: "/assets/events-page-hero.png", alt: "Lens Foundation volunteers standing together", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "about-mission", page: "About Us", label: "Mission image", description: "Supporting image beside the mission statement.", image: "/assets/impact-outreach.jpg", alt: "Lens Foundation volunteers preparing outreach supplies", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "about-vision", page: "About Us", label: "Vision image", description: "Supporting image beside the vision statement.", image: "/assets/impact-community.jpg", alt: "Lens Foundation volunteers with school children", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "about-founder", page: "About Us", label: "Founder portrait", description: "Portrait shown beside the founder's message.", image: "/assets/team-omobolanle-sodiya.jpg", alt: "Omobolanle Sodiya, Founding Director of The Lens Foundation", focalPoint: { x: 50, y: 35 }, aspect: "portrait" },
+  { id: "events-hero", page: "Events", label: "Events hero", description: "Main image at the top of the Events page.", image: "/assets/events-page-hero.png", alt: "Lens Foundation team members gathered at a community event", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "podium-skills", page: "Lens Podium", label: "Participant outcomes", description: "Supporting visual for what participants will gain.", image: "/assets/podium-skills.png", alt: "Teens public speaking and sign language bootcamp programme artwork", focalPoint: { x: 50, y: 50 }, aspect: "portrait" },
+  { id: "podium-training", page: "Lens Podium", label: "Programme format", description: "Supporting visual for how the programme works.", image: "/assets/podium-training.png", alt: "Lens the Podium communication and leadership word cloud", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "podium-inclusive", page: "Lens Podium", label: "Inclusive programme visual", description: "Main visual in the inclusive programme section.", image: "/assets/podium-inclusive.png", alt: "Lens the Podium raised-fist microphone logo", focalPoint: { x: 50, y: 50 }, aspect: "square" },
+  { id: "volunteer-hero", page: "Volunteer", label: "Volunteer hero", description: "Main image at the top of the volunteer application page.", image: "/assets/volunteer-hero.png", alt: "Lens Foundation community outreach participants", focalPoint: { x: 50, y: 42 }, aspect: "landscape" },
+  { id: "partner-hero", page: "Partner", label: "Partner hero", description: "Main image at the top of the partnership application page.", image: "/assets/partner-hero.png", alt: "Lens Foundation community outreach participants", focalPoint: { x: 50, y: 46 }, aspect: "landscape" },
+  { id: "contact-hero", page: "Contact Us", label: "Contact Us hero", description: "Main image at the top of the Contact Us page.", image: "/assets/contact-hero.png", alt: "Lens Foundation team members standing together", focalPoint: { x: 50, y: 23 }, aspect: "landscape" },
+];
+
+export const defaultTeamMembers: TeamMemberRecord[] = [
+  { id: "omobolanle-sodiya", name: "Omobolanle Sodiya", role: "Founding Director", image: "/assets/team-omobolanle-sodiya.jpg", focalPoint: { x: 50, y: 35 } },
+  { id: "ayobami-johnson", name: "Ayobami Johnson", role: "Director of Operations", image: "/assets/team-ayobami-johnson.jpg", focalPoint: { x: 50, y: 30 } },
+  { id: "joy-dada", name: "Joy Dada", role: "Head of Admin", image: "/assets/team-joy-dada.png", focalPoint: { x: 50, y: 28 } },
+  { id: "michael-gbademu", name: "Michael Gbademu", role: "Team Lead — Volunteers", image: "/assets/team-michael-gbademu.png", focalPoint: { x: 50, y: 26 } },
+  { id: "team-member-5", name: "Team member", role: "Profile coming soon", image: "", focalPoint: { x: 50, y: 50 } },
+  { id: "team-member-6", name: "Team member", role: "Profile coming soon", image: "", focalPoint: { x: 50, y: 50 } },
+];
+
 export const defaultFaqs: FaqRecord[] = [
   { id: "what-we-do", question: "What does The Lens Foundation do?", answer: "The Lens Foundation supports children, families, and communities through education, food assistance, healthcare support, financial aid, outreach programmes, and other practical initiatives designed to meet real needs.", status: "Published" },
   { id: "who-we-support", question: "Who does The Lens Foundation support?", answer: "We support children, young people, families, and underserved communities facing barriers to education, wellbeing, and essential resources.", status: "Published" },
@@ -53,6 +104,8 @@ const storageKeys = {
   reports: "lens-cms-reports-v1",
   testimonials: "lens-cms-testimonials-v1",
   faqs: "lens-cms-faqs-v1",
+  siteImages: "lens-cms-site-images-v1",
+  team: "lens-cms-team-v1",
 } as const;
 
 function readCollection<T>(key: string, fallback: T[]): T[] {
@@ -106,3 +159,14 @@ export const getTestimonials = () => readCollection(storageKeys.testimonials, de
 export const saveTestimonials = (records: TestimonialRecord[]) => saveCollection(storageKeys.testimonials, records);
 export const getFaqs = () => readCollection(storageKeys.faqs, defaultFaqs);
 export const saveFaqs = (records: FaqRecord[]) => saveCollection(storageKeys.faqs, records);
+export const getSiteImages = () => readCollection(storageKeys.siteImages, defaultSiteImages).map((record) => ({
+  ...record,
+  focalPoint: record.focalPoint ?? { x: 50, y: 50 },
+}));
+export const getSiteImage = (id: string) => getSiteImages().find((record) => record.id === id) ?? defaultSiteImages.find((record) => record.id === id)!;
+export const saveSiteImages = (records: SiteImageRecord[]) => saveCollection(storageKeys.siteImages, records);
+export const getTeamMembers = () => readCollection(storageKeys.team, defaultTeamMembers).map((record) => ({
+  ...record,
+  focalPoint: record.focalPoint ?? { x: 50, y: 50 },
+}));
+export const saveTeamMembers = (records: TeamMemberRecord[]) => saveCollection(storageKeys.team, records.slice(0, 6));

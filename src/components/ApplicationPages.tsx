@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
+import { getSiteImage } from "../data/cms";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 
@@ -29,10 +30,26 @@ function Field({ label, name, optional = false, multiline = false, children, ...
   );
 }
 
-function SelectField({ label, name, optional = false, placeholder, options }: { label: string; name: string; optional?: boolean; placeholder: string; options: string[] }) {
-  const [value, setValue] = useState("");
+type SelectFieldProps = {
+  label: string;
+  name: string;
+  optional?: boolean;
+  placeholder: string;
+  options: string[];
+  value?: string;
+  onValueChange?: (value: string) => void;
+};
+
+function SelectField({ label, name, optional = false, placeholder, options, value: controlledValue, onValueChange }: SelectFieldProps) {
+  const [internalValue, setInternalValue] = useState("");
   const [open, setOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement>(null);
+  const value = controlledValue ?? internalValue;
+
+  const updateValue = (nextValue: string) => {
+    if (controlledValue === undefined) setInternalValue(nextValue);
+    onValueChange?.(nextValue);
+  };
 
   useEffect(() => {
     const closeOnOutsideClick = (event: PointerEvent) => {
@@ -60,14 +77,42 @@ function SelectField({ label, name, optional = false, placeholder, options }: { 
           <img src="/assets/contact-select-chevron.svg" alt="" aria-hidden="true" />
         </button>
         <div className="application-custom-options" role="listbox" aria-label={label} data-open={open}>
-          {options.map((option) => <button type="button" role="option" aria-selected={value === option} key={option} onClick={() => { setValue(option); setOpen(false); }}>{option}</button>)}
+          {options.map((option) => <button type="button" role="option" aria-selected={value === option} key={option} onClick={() => { updateValue(option); setOpen(false); }}>{option}</button>)}
         </div>
-        <select className="application-custom-native" name={name} value={value} required={!optional} tabIndex={-1} onChange={(event) => setValue(event.target.value)} onInvalid={() => setOpen(true)}>
+        <select className="application-custom-native" name={name} value={value} required={!optional} tabIndex={-1} onChange={(event) => updateValue(event.target.value)} onInvalid={() => setOpen(true)}>
           <option value="">{placeholder}</option>
           {options.map((option) => <option key={option}>{option}</option>)}
         </select>
       </div>
     </div>
+  );
+}
+
+const birthMonths = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function BirthdayField() {
+  const [month, setMonth] = useState("");
+  const [day, setDay] = useState("");
+  const monthIndex = birthMonths.indexOf(month);
+  const daysInMonth = monthIndex < 0 ? 31 : new Date(2024, monthIndex + 1, 0).getDate();
+  const dayOptions = Array.from({ length: daysInMonth }, (_, index) => String(index + 1));
+
+  useEffect(() => {
+    if (day && Number(day) > daysInMonth) setDay("");
+  }, [day, daysInMonth]);
+
+  return (
+    <fieldset className="application-birthday">
+      <legend>Date of Birth <RequiredMark /></legend>
+      <p>Month and day only — your birth year is not required.</p>
+      <div className="application-birthday-grid">
+        <SelectField label="Month" name="birthMonth" placeholder="Select month" options={birthMonths} value={month} onValueChange={setMonth} />
+        <SelectField label="Day" name="birthDay" placeholder="Select day" options={dayOptions} value={day} onValueChange={setDay} />
+      </div>
+    </fieldset>
   );
 }
 
@@ -89,16 +134,19 @@ function ApplicationHero({
   image,
   imageClass,
   nodeId,
+  imageId,
 }: {
   eyebrow: string;
   title: string;
   image: string;
   imageClass: string;
   nodeId: string;
+  imageId: string;
 }) {
+  const managedImage = getSiteImage(imageId);
   return (
     <section className="application-hero" data-node-id={nodeId} aria-labelledby={`${imageClass}-title`}>
-      <img className={`application-hero-image ${imageClass}`} src={image} alt="Lens Foundation community outreach participants" />
+      <img className={`application-hero-image ${imageClass}`} src={managedImage?.image ?? image} alt={managedImage?.alt ?? "Lens Foundation community outreach participants"} style={{ objectPosition: `${managedImage?.focalPoint.x ?? 50}% ${managedImage?.focalPoint.y ?? 50}%` }} />
       <div className="application-hero-overlay" aria-hidden="true" />
       <div className="content-wrapper application-hero-content">
         <p>{eyebrow}</p>
@@ -139,16 +187,12 @@ function VolunteerForm() {
           <div className="application-grid">
             <Field label="First Name" name="firstName" autoComplete="given-name" placeholder="Enter your answer" />
             <Field label="Surname" name="surname" autoComplete="family-name" placeholder="Enter your answer" />
-            <Field label="Middle Name" name="middleName" optional autoComplete="additional-name" placeholder="Enter your answer" />
             <Field label="Email" name="email" type="email" autoComplete="email" placeholder="Enter your answer" />
             <SelectField label="Sex" name="sex" placeholder="Select an option" options={["Female", "Male", "Prefer not to say"]} />
-            <Field label="Date of Birth" name="dateOfBirth" type="date" autoComplete="bday" />
+            <BirthdayField />
             <Field label="Nationality" name="nationality" autoComplete="country-name" placeholder="Enter your answer" />
-            <Field label="State of Origin" name="stateOfOrigin" placeholder="Enter your answer" />
-            <Field label="Local Govt Area" name="localGovernmentArea" placeholder="Enter your answer" />
-            <Field label="Contact Address" name="contactAddress" autoComplete="street-address" placeholder="Enter your answer" />
+            <Field label="Current Location" name="currentLocation" autoComplete="address-level1" placeholder="City, state, or country" />
             <Field label="Phone Number" name="phone" type="tel" autoComplete="tel" placeholder="Enter your answer" />
-            <Field label="Whatsapp Number" name="whatsapp" type="tel" optional placeholder="Enter your answer" />
           </div>
           <SelectField label="Preferred Chapter" name="preferredChapter" placeholder="Select a chapter" options={["Lagos", "Ghana", "USA", "London"]} />
         </section>
@@ -186,12 +230,6 @@ function VolunteerForm() {
           </fieldset>
         </section>
 
-        <div className="application-consent">
-          <label>
-            <input type="checkbox" name="termsAccepted" required />
-            <span>I confirm that I have read and accepted the Terms and Conditions. <RequiredMark /></span>
-          </label>
-        </div>
         <SubmitArea submitted={submitted} />
       </form>
     </section>
@@ -274,14 +312,16 @@ function PartnerForm() {
             <Field label="Phone Number" name="phone" type="tel" autoComplete="tel" placeholder="Enter a phone number" />
             <Field label="Location" name="location" autoComplete="address-level1" placeholder="City, state, or country" />
           </div>
-          <Field label="About you or your organization" name="about" multiline placeholder="Tell us what you or your organization does" />
+          {partnerType === "organization" && (
+            <Field label="About your organization" name="aboutOrganization" multiline placeholder="Tell us what your organization does" />
+          )}
         </section>
 
         <section className="application-group">
           <SectionHeading number="02" total="02" title="Contact preferences" description="Let us know the best way and time to continue the conversation." />
           <div className="application-grid">
-            <Field label="Preferred Mode of Contact" name="contactMode" placeholder="Email, phone call, or WhatsApp" />
-            <Field label="Preferred Time of Contact" name="contactTime" optional placeholder="Morning, afternoon, or evening" />
+            <SelectField label="Preferred Mode of Contact" name="contactMode" placeholder="Select a contact method" options={["Email", "Phone call", "WhatsApp"]} />
+            <SelectField label="Preferred Time of Contact" name="contactTime" optional placeholder="Select a preferred time" options={["Morning", "Afternoon", "Evening"]} />
           </div>
           <Field label="How did you hear about Lens Foundation?" name="heardFrom" placeholder="Select or enter your answer" />
           <Field label="Additional Message" name="message" optional multiline placeholder="Share anything else you would like us to know" />
@@ -302,6 +342,7 @@ export function VolunteerPage() {
           eyebrow="~VOLUNTEER~"
           title="Give your time. Help turn compassion into action."
           image="/assets/volunteer-hero.png"
+          imageId="volunteer-hero"
           imageClass="volunteer-hero-image"
           nodeId="201:2960"
         />
@@ -321,6 +362,7 @@ export function PartnerPage() {
           eyebrow="~PARTNERSHIP~"
           title="Bring your resources closer to real community needs."
           image="/assets/partner-hero.png"
+          imageId="partner-hero"
           imageClass="partner-hero-image"
           nodeId="201:2929"
         />
