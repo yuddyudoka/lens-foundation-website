@@ -25,14 +25,19 @@ export type EventRecord = {
 };
 
 export function getLatestEvents(events: EventRecord[], limit = 6): EventRecord[] {
-  const upcomingEvents = events.filter((event) => event.status === "Upcoming");
-  const homepageEvents = upcomingEvents.length > 0 ? upcomingEvents : events;
+  const eventTimestamp = (event: EventRecord) => {
+    const dateTimestamp = Date.parse(event.dateValue);
+    if (!Number.isNaN(dateTimestamp)) return dateTimestamp;
+    const createdTimestamp = Date.parse(event.createdAt ?? "");
+    return Number.isNaN(createdTimestamp) ? 0 : createdTimestamp;
+  };
 
-  return [...homepageEvents]
+  return [...events]
     .sort((a, b) => {
-      const aTimestamp = Date.parse(a.createdAt ?? a.dateValue);
-      const bTimestamp = Date.parse(b.createdAt ?? b.dateValue);
-      return bTimestamp - aTimestamp;
+      if (a.status !== b.status) return a.status === "Upcoming" ? -1 : 1;
+      const dateDifference = eventTimestamp(b) - eventTimestamp(a);
+      if (dateDifference !== 0) return dateDifference;
+      return Date.parse(b.createdAt ?? "") - Date.parse(a.createdAt ?? "");
     })
     .slice(0, limit);
 }
@@ -118,6 +123,15 @@ export async function loadEvents(): Promise<EventRecord[]> {
       const stored = window.localStorage.getItem("lens-cms-events-v1");
       if (stored !== null) {
         const localRecords = (JSON.parse(stored) as unknown[]).filter(isEventRecord);
+        const hasSeededCollection = window.localStorage.getItem("lens-cms-events-seeded-v2") === "true";
+        if (!hasSeededCollection) {
+          const mergedRecords = new Map(fallbackEvents.map((event) => [event.id, event]));
+          localRecords.forEach((event) => mergedRecords.set(event.id, event));
+          const migratedRecords = [...mergedRecords.values()];
+          window.localStorage.setItem("lens-cms-events-v1", JSON.stringify(migratedRecords));
+          window.localStorage.setItem("lens-cms-events-seeded-v2", "true");
+          return hydrateEventDetails(migratedRecords);
+        }
         return hydrateEventDetails(localRecords);
       }
     } catch {

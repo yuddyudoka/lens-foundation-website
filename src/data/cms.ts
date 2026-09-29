@@ -71,7 +71,10 @@ function saveCollection<T>(key: string, value: T[]) {
 }
 
 export const getLocalEvents = () => readCollection<EventRecord>(storageKeys.events, []);
-export const saveLocalEvents = (records: EventRecord[]) => saveCollection(storageKeys.events, records);
+export const saveLocalEvents = (records: EventRecord[]) => {
+  saveCollection(storageKeys.events, records);
+  window.localStorage.setItem("lens-cms-events-seeded-v2", "true");
+};
 function limitPublishedAnnualReports(records: AnnualReportRecord[]) {
   const published = records
     .filter((report) => report.status === "Published")
