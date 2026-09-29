@@ -27,8 +27,6 @@ function EventCard({ event }: { event: EventRecord }) {
 export function Events() {
   const railRef = useRef<HTMLDivElement>(null);
   const [events, setEvents] = useState<EventRecord[]>(() => getLatestEvents(fallbackEvents));
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
   const hasCarouselNavigation = events.length > 4;
 
   useEffect(() => {
@@ -39,28 +37,22 @@ export function Events() {
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    const rail = railRef.current;
-    if (!rail) return;
-    const frame = window.requestAnimationFrame(updateControls);
-    const observer = new ResizeObserver(updateControls);
-    observer.observe(rail);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      observer.disconnect();
-    };
-  }, [events]);
-
-  const updateControls = () => {
-    const rail = railRef.current;
-    if (!rail) return;
-    setAtStart(rail.scrollLeft <= 2);
-    setAtEnd(rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 2);
-  };
-
   const moveRail = (direction: -1 | 1) => {
     const rail = railRef.current;
     if (!rail) return;
+    const maxScrollLeft = Math.max(0, rail.scrollWidth - rail.clientWidth);
+    const atStart = rail.scrollLeft <= 2;
+    const atEnd = rail.scrollLeft >= maxScrollLeft - 2;
+
+    if (direction === -1 && atStart) {
+      rail.scrollTo({ left: maxScrollLeft, behavior: "smooth" });
+      return;
+    }
+    if (direction === 1 && atEnd) {
+      rail.scrollTo({ left: 0, behavior: "smooth" });
+      return;
+    }
+
     const firstCard = rail.querySelector<HTMLElement>(".event-card");
     const gap = Number.parseFloat(window.getComputedStyle(rail).columnGap) || 20;
     rail.scrollBy({ left: direction * ((firstCard?.offsetWidth ?? 321) + gap), behavior: "smooth" });
@@ -79,29 +71,29 @@ export function Events() {
           </a>
         </header>
 
-        <div className="events-rail" ref={railRef} onScroll={updateControls}>
+        <div className="events-rail" ref={railRef}>
           {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
         </div>
 
         <div className="events-controls events-controls-desktop" aria-label="Event carousel controls">
-          <button type="button" onClick={() => moveRail(-1)} disabled={!hasCarouselNavigation || atStart} aria-label="Previous events">
+          <button type="button" onClick={() => moveRail(-1)} disabled={!hasCarouselNavigation} aria-label="Previous events">
             <img className="events-arrow-previous" src="/assets/event-arrow-active.svg" alt="" />
           </button>
-          <button type="button" onClick={() => moveRail(1)} disabled={!hasCarouselNavigation || atEnd} aria-label="Next events">
+          <button type="button" onClick={() => moveRail(1)} disabled={!hasCarouselNavigation} aria-label="Next events">
             <img src="/assets/event-arrow-active.svg" alt="" />
           </button>
         </div>
 
         <div className="events-footer-mobile" aria-label="Event carousel controls">
-            <button type="button" onClick={() => moveRail(-1)} disabled={!hasCarouselNavigation || atStart} aria-label="Previous events">
+            <button type="button" onClick={() => moveRail(-1)} disabled={!hasCarouselNavigation} aria-label="Previous events">
               <img className="events-arrow-previous" src="/assets/event-arrow-active.svg" alt="" />
             </button>
             <a className="button button-primary events-view-all" href="/events">
               View all Events
             </a>
-            <button type="button" onClick={() => moveRail(1)} disabled={!hasCarouselNavigation || atEnd} aria-label="Next events">
+            <button type="button" onClick={() => moveRail(1)} disabled={!hasCarouselNavigation} aria-label="Next events">
               <img src="/assets/event-arrow-active.svg" alt="" />
             </button>
         </div>
