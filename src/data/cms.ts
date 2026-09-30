@@ -107,7 +107,7 @@ export const defaultFaqs: FaqRecord[] = [
   { id: "podium-prize", page: "Lens Podium", question: "Is there a prize to be won?", answer: "Yes. Participants who demonstrate exceptional growth may receive a prize, and every participant who completes the curriculum receives a certificate.", status: "Published" },
 ];
 
-const storageKeys = {
+export const storageKeys = {
   events: "lens-cms-events-v1",
   reports: "lens-cms-reports-v1",
   testimonials: "lens-cms-testimonials-v1",
@@ -116,6 +116,72 @@ const storageKeys = {
   siteImages: "lens-cms-site-images-v1",
   team: "lens-cms-team-v1",
 } as const;
+
+type CmsCollectionName = "events" | "reports" | "testimonials" | "faqs" | "siteImages" | "team";
+
+const apiCollectionByStorageKey: Partial<Record<string, CmsCollectionName>> = {
+  [storageKeys.events]: "events",
+  [storageKeys.reports]: "reports",
+  [storageKeys.testimonials]: "testimonials",
+  [storageKeys.faqs]: "faqs",
+  [storageKeys.siteImages]: "siteImages",
+  [storageKeys.team]: "team",
+};
+
+const remoteSaveState = new Map<string, { latest: unknown[]; inFlight: boolean }>();
+
+function queueRemoteSave(key: string, value: unknown[]) {
+  if (typeof window === "undefined") return;
+  const collection = apiCollectionByStorageKey[key];
+  if (!collection) return;
+  const state = remoteSaveState.get(key) ?? { latest: value, inFlight: false };
+  state.latest = value;
+  remoteSaveState.set(key, state);
+  if (state.inFlight) return;
+
+  const flush = async () => {
+    const current = remoteSaveState.get(key);
+    if (!current) return;
+    const payload = current.latest;
+    current.inFlight = true;
+    try {
+      const response = await fetch(`/api/cms/${collection}`, {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("CMS sync failed.");
+    } catch {
+      window.dispatchEvent(new CustomEvent("lens-cms-save-error", { detail: collection }));
+    } finally {
+      const latest = remoteSaveState.get(key);
+      if (!latest) return;
+      latest.inFlight = false;
+      if (latest.latest === payload) remoteSaveState.delete(key);
+      else void flush();
+    }
+  };
+
+  void flush();
+}
+
+export async function hydrateCms() {
+  if (typeof window === "undefined") return;
+  try {
+    const response = await fetch("/api/cms", { cache: "no-store", credentials: "same-origin" });
+    if (!response.ok) return;
+    const payload = await response.json() as Partial<Record<CmsCollectionName, unknown[]>>;
+    for (const [storageKey, collection] of Object.entries(apiCollectionByStorageKey)) {
+      const value = collection ? payload[collection] : undefined;
+      if (Array.isArray(value)) window.localStorage.setItem(storageKey, JSON.stringify(value));
+    }
+    if (Array.isArray(payload.events)) window.localStorage.setItem("lens-cms-events-seeded-v2", "true");
+    window.dispatchEvent(new CustomEvent("lens-cms-updated", { detail: "remote-hydration" }));
+  } catch {
+    // Local development and temporary network failures continue using the last browser cache.
+  }
+}
 
 function readCollection<T>(key: string, fallback: T[]): T[] {
   if (typeof window === "undefined") return fallback;
@@ -130,6 +196,7 @@ function readCollection<T>(key: string, fallback: T[]): T[] {
 function saveCollection<T>(key: string, value: T[]) {
   window.localStorage.setItem(key, JSON.stringify(value));
   window.dispatchEvent(new CustomEvent("lens-cms-updated", { detail: key }));
+  queueRemoteSave(key, value);
 }
 
 export const getLocalEvents = () => readCollection<EventRecord>(storageKeys.events, []);

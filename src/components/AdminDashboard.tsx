@@ -115,6 +115,11 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     const timer = window.setTimeout(() => setNotice(""), 2600);
     return () => window.clearTimeout(timer);
   }, [notice]);
+  useEffect(() => {
+    const handleSaveError = () => setNotice("The browser copy was saved, but Cloudflare KV could not be updated. Please try again.");
+    window.addEventListener("lens-cms-save-error", handleSaveError);
+    return () => window.removeEventListener("lens-cms-save-error", handleSaveError);
+  }, []);
 
   const counts = { events: events.length, reports: reports.length, testimonials: testimonials.length, team: teamMembers.length, media: siteImages.length, faqs: faqs.filter((faq) => faq.page === "Home").length, "podium-faqs": faqs.filter((faq) => faq.page === "Lens Podium").length };
   const publishedCount = reports.filter((item) => item.status === "Published").length + testimonials.filter((item) => item.status === "Published").length + faqs.filter((item) => item.status === "Published").length + events.length;
