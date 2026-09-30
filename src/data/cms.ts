@@ -44,6 +44,7 @@ export type TeamMemberRecord = {
 
 export type FaqRecord = {
   id: string;
+  page: "Home" | "Lens Podium";
   question: string;
   answer: string;
   status: "Published" | "Draft";
@@ -86,24 +87,32 @@ export const defaultTeamMembers: TeamMemberRecord[] = [
   { id: "ayobami-johnson", name: "Ayobami Johnson", role: "Director of Operations", image: "/assets/team-ayobami-johnson.jpg", focalPoint: { x: 50, y: 30 } },
   { id: "joy-dada", name: "Joy Dada", role: "Head of Admin", image: "/assets/team-joy-dada.png", focalPoint: { x: 50, y: 28 } },
   { id: "michael-gbademu", name: "Michael Gbademu", role: "Team Lead — Volunteers", image: "/assets/team-michael-gbademu.png", focalPoint: { x: 50, y: 26 } },
-  { id: "team-member-5", name: "Team member", role: "Profile coming soon", image: "", focalPoint: { x: 50, y: 50 } },
-  { id: "team-member-6", name: "Team member", role: "Profile coming soon", image: "", focalPoint: { x: 50, y: 50 } },
+  { id: "ubaka-amen", name: "Ubaka Amen", role: "Team Lead — Volunteers", image: "/assets/team-ubaka-amen.png", focalPoint: { x: 50, y: 28 } },
+  { id: "abisola-rahman", name: "Abisola Rahman", role: "Director of Mission", image: "", focalPoint: { x: 50, y: 50 } },
 ];
 
 export const defaultFaqs: FaqRecord[] = [
-  { id: "what-we-do", question: "What does The Lens Foundation do?", answer: "The Lens Foundation supports children, families, and communities through education, food assistance, healthcare support, financial aid, outreach programmes, and other practical initiatives designed to meet real needs.", status: "Published" },
-  { id: "who-we-support", question: "Who does The Lens Foundation support?", answer: "We support children, young people, families, and underserved communities facing barriers to education, wellbeing, and essential resources.", status: "Published" },
-  { id: "how-to-donate", question: "How can I donate?", answer: "You can make a donation through our secure Paystack option or transfer directly to the bank account shown in the donation modal.", status: "Published" },
-  { id: "donation-use", question: "How are donations used?", answer: "Donations fund practical programmes including education support, food assistance, healthcare interventions, and community outreach.", status: "Published" },
-  { id: "education-sponsorship", question: "Can I sponsor a child’s education?", answer: "Yes. Education sponsorship can help cover learning materials, school-related costs, and other support a child needs to stay engaged in school.", status: "Published" },
-  { id: "volunteer", question: "Can I volunteer with The Lens Foundation?", answer: "Yes. Volunteers can contribute their time and skills across programmes, events, outreach, and operational support in an active chapter.", status: "Published" },
+  { id: "what-we-do", page: "Home", question: "What does The Lens Foundation do?", answer: "The Lens Foundation supports children, families, and communities through education, food assistance, healthcare support, financial aid, outreach programmes, and other practical initiatives designed to meet real needs.", status: "Published" },
+  { id: "who-we-support", page: "Home", question: "Who does The Lens Foundation support?", answer: "We support children, young people, families, and underserved communities facing barriers to education, wellbeing, and essential resources.", status: "Published" },
+  { id: "how-to-donate", page: "Home", question: "How can I donate?", answer: "You can make a donation through our secure Paystack option or transfer directly to the bank account shown in the donation modal.", status: "Published" },
+  { id: "donation-use", page: "Home", question: "How are donations used?", answer: "Donations fund practical programmes including education support, food assistance, healthcare interventions, and community outreach.", status: "Published" },
+  { id: "education-sponsorship", page: "Home", question: "Can I sponsor a child’s education?", answer: "Yes. Education sponsorship can help cover learning materials, school-related costs, and other support a child needs to stay engaged in school.", status: "Published" },
+  { id: "volunteer", page: "Home", question: "Can I volunteer with The Lens Foundation?", answer: "Yes. Volunteers can contribute their time and skills across programmes, events, outreach, and operational support in an active chapter.", status: "Published" },
+  { id: "podium-about", page: "Lens Podium", question: "What’s LENS the Podium about?", answer: "LENS the Podium is an initiative by Lens Foundation that provides young people with a platform to express themselves and build confidence.", status: "Published" },
+  { id: "podium-participation", page: "Lens Podium", question: "Who can participate?", answer: "LENS the Podium is open to young people between ages 11 and 19.", status: "Published" },
+  { id: "podium-experience", page: "Lens Podium", question: "Do I need public speaking experience?", answer: "No, you don’t need previous public speaking experience.", status: "Published" },
+  { id: "podium-apply", page: "Lens Podium", question: "How do I apply?", answer: "Complete the application form above.", status: "Published" },
+  { id: "podium-selection", page: "Lens Podium", question: "Does applying guarantee that I will be selected?", answer: "No. Applications are reviewed by the Lens Foundation team, and selected applicants will be contacted.", status: "Published" },
+  { id: "podium-fee", page: "Lens Podium", question: "Is there a fee?", answer: "No. This is a completely free programme.", status: "Published" },
+  { id: "podium-prize", page: "Lens Podium", question: "Is there a prize to be won?", answer: "Yes. Participants who demonstrate exceptional growth may receive a prize, and every participant who completes the curriculum receives a certificate.", status: "Published" },
 ];
 
 const storageKeys = {
   events: "lens-cms-events-v1",
   reports: "lens-cms-reports-v1",
   testimonials: "lens-cms-testimonials-v1",
-  faqs: "lens-cms-faqs-v1",
+  faqs: "lens-cms-faqs-v2",
+  legacyFaqs: "lens-cms-faqs-v1",
   siteImages: "lens-cms-site-images-v1",
   team: "lens-cms-team-v1",
 } as const;
@@ -157,7 +166,18 @@ const testimonialImageUpgrades: Record<string, string> = {
 export const getTestimonials = () => readCollection(storageKeys.testimonials, defaultTestimonials)
   .map((testimonial) => ({ ...testimonial, image: testimonialImageUpgrades[testimonial.image] ?? testimonial.image }));
 export const saveTestimonials = (records: TestimonialRecord[]) => saveCollection(storageKeys.testimonials, records);
-export const getFaqs = () => readCollection(storageKeys.faqs, defaultFaqs);
+export const getFaqs = () => {
+  if (typeof window === "undefined") return defaultFaqs;
+  const current = window.localStorage.getItem(storageKeys.faqs);
+  if (current) return readCollection(storageKeys.faqs, defaultFaqs);
+  const legacy = readCollection<Omit<FaqRecord, "page"> & { page?: FaqRecord["page"] }>(storageKeys.legacyFaqs, []);
+  const migrated = [
+    ...(legacy.length ? legacy.map((faq) => ({ ...faq, page: faq.page ?? "Home" as const })) : defaultFaqs.filter((faq) => faq.page === "Home")),
+    ...defaultFaqs.filter((faq) => faq.page === "Lens Podium"),
+  ];
+  window.localStorage.setItem(storageKeys.faqs, JSON.stringify(migrated));
+  return migrated;
+};
 export const saveFaqs = (records: FaqRecord[]) => saveCollection(storageKeys.faqs, records);
 const previousHeroDefaults: Record<string, Array<{ image: string; y: number }>> = {
   "home-hero": [{ image: "/assets/hero-team-1.jpg", y: 50 }],
@@ -194,8 +214,10 @@ export const getSiteImages = () => readCollection(storageKeys.siteImages, defaul
 });
 export const getSiteImage = (id: string) => getSiteImages().find((record) => record.id === id) ?? defaultSiteImages.find((record) => record.id === id)!;
 export const saveSiteImages = (records: SiteImageRecord[]) => saveCollection(storageKeys.siteImages, records);
-export const getTeamMembers = () => readCollection(storageKeys.team, defaultTeamMembers).map((record) => ({
-  ...record,
-  focalPoint: record.focalPoint ?? { x: 50, y: 50 },
-}));
+export const getTeamMembers = () => readCollection(storageKeys.team, defaultTeamMembers).map((record) => {
+  const isEmptyPlaceholder = record.name === "Team member" && record.role === "Profile coming soon" && !record.image;
+  if (isEmptyPlaceholder && record.id === "team-member-5") return defaultTeamMembers[4];
+  if (isEmptyPlaceholder && record.id === "team-member-6") return defaultTeamMembers[5];
+  return { ...record, focalPoint: record.focalPoint ?? { x: 50, y: 50 } };
+});
 export const saveTeamMembers = (records: TeamMemberRecord[]) => saveCollection(storageKeys.team, records.slice(0, 6));

@@ -16,7 +16,7 @@ function RequiredMark() {
   return <span className="required-mark" aria-hidden="true">*</span>;
 }
 
-function Field({ label, name, optional = false, multiline = false, children, ...props }: FieldProps) {
+export function Field({ label, name, optional = false, multiline = false, children, ...props }: FieldProps) {
   return (
     <label className={`application-field${multiline ? " application-field-wide" : ""}`}>
       <span>
@@ -41,7 +41,7 @@ type SelectFieldProps = {
   onValueChange?: (value: string) => void;
 };
 
-function SelectField({ label, name, optional = false, placeholder, options, value: controlledValue, onValueChange }: SelectFieldProps) {
+export function SelectField({ label, name, optional = false, placeholder, options, value: controlledValue, onValueChange }: SelectFieldProps) {
   const [internalValue, setInternalValue] = useState("");
   const [open, setOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement>(null);
@@ -117,7 +117,7 @@ function BirthdayField() {
   );
 }
 
-function SectionHeading({ number, total, title, description }: { number: string; total?: string; title: string; description: string }) {
+export function SectionHeading({ number, total, title, description }: { number: string; total?: string; title: string; description: string }) {
   return (
     <div className="application-section-heading">
       <div className="application-section-title">

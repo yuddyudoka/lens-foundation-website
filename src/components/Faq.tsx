@@ -1,23 +1,24 @@
 import { useState } from "react";
-import { getFaqs } from "../data/cms";
+import { getFaqs, type FaqRecord } from "../data/cms";
 
-export function Faq() {
+export function Faq({ page = "Home", title = "Questions You May Have, Answered" }: { page?: FaqRecord["page"]; title?: string }) {
   const [openIndex, setOpenIndex] = useState(0);
-  const faqs = getFaqs().filter((faq) => faq.status === "Published");
+  const faqs = getFaqs().filter((faq) => faq.page === page && faq.status === "Published");
+  const sectionId = `faq-${page.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (
-    <section className="faq-section" aria-labelledby="faq-title" data-node-id="73:1234">
+    <section className="faq-section" aria-labelledby={`${sectionId}-title`} data-node-id="73:1234">
       <div className="content-wrapper faq-layout">
         <header className="section-heading faq-heading">
           <p>FAQs</p>
-          <h2 id="faq-title">Questions You May Have, Answered</h2>
+          <h2 id={`${sectionId}-title`}>{title}</h2>
         </header>
 
         <div className="faq-content">
           <div className="faq-list">
             {faqs.map((faq, index) => {
               const isOpen = openIndex === index;
-              const answerId = `faq-answer-${index}`;
+              const answerId = `${sectionId}-answer-${index}`;
 
               return (
                 <article className="faq-item" data-open={isOpen} key={`${faq.question}-${index}`}>

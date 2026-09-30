@@ -1,4 +1,4 @@
-export type FormKind = "contact" | "volunteer" | "partner";
+export type FormKind = "contact" | "volunteer" | "partner" | "podium";
 
 export async function submitSiteForm(kind: FormKind, form: HTMLFormElement) {
   const fields: Record<string, string | string[]> = {};

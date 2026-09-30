@@ -3,6 +3,7 @@ import {
   ArrowSquareOut,
   CalendarDots,
   CaretDown,
+  CaretUp,
   Check,
   FileText,
   House,
@@ -40,7 +41,7 @@ import {
   type TeamMemberRecord,
 } from "../data/cms";
 
-type Section = "overview" | "events" | "reports" | "testimonials" | "team" | "media" | "faqs";
+type Section = "overview" | "events" | "reports" | "testimonials" | "team" | "media" | "faqs" | "podium-faqs";
 type Editor =
   | { kind: "event"; item: EventRecord }
   | { kind: "report"; item: AnnualReportRecord }
@@ -57,6 +58,7 @@ const navItems: { id: Section; label: string; icon: typeof House }[] = [
   { id: "team", label: "Team", icon: UsersThree },
   { id: "media", label: "Page images", icon: ImageSquare },
   { id: "faqs", label: "FAQs", icon: Question },
+  { id: "podium-faqs", label: "Podium FAQs", icon: Question },
 ];
 
 function slugify(value: string) {
@@ -91,7 +93,7 @@ function blankEvent(): EventRecord {
 
 const blankReport = (): AnnualReportRecord => ({ id: "", year: String(new Date().getFullYear()), title: "", description: "", url: "", status: "Draft" });
 const blankTestimonial = (): TestimonialRecord => ({ id: "", quote: "", name: "", role: "", image: "", focalPoint: { x: 50, y: 50 }, status: "Draft" });
-const blankFaq = (): FaqRecord => ({ id: "", question: "", answer: "", status: "Draft" });
+const blankFaq = (page: FaqRecord["page"]): FaqRecord => ({ id: "", page, question: "", answer: "", status: "Draft" });
 
 export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   const [section, setSection] = useState<Section>("overview");
@@ -114,7 +116,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  const counts = { events: events.length, reports: reports.length, testimonials: testimonials.length, team: teamMembers.length, media: siteImages.length, faqs: faqs.length };
+  const counts = { events: events.length, reports: reports.length, testimonials: testimonials.length, team: teamMembers.length, media: siteImages.length, faqs: faqs.filter((faq) => faq.page === "Home").length, "podium-faqs": faqs.filter((faq) => faq.page === "Lens Podium").length };
   const publishedCount = reports.filter((item) => item.status === "Published").length + testimonials.filter((item) => item.status === "Published").length + faqs.filter((item) => item.status === "Published").length + events.length;
   const upcomingCount = events.filter((item) => item.status === "Upcoming").length;
   const q = query.trim().toLowerCase();
@@ -134,6 +136,14 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   function persistReports(next: AnnualReportRecord[]) { const normalized = saveAnnualReports(next); setReports(normalized); setNotice("Annual reports updated. Only the three newest published years appear on the homepage."); }
   function persistTestimonials(next: TestimonialRecord[]) { setTestimonials(next); saveTestimonials(next); setNotice("Testimonials updated on the website."); }
   function persistTeam(next: TeamMemberRecord[]) { setTeamMembers(next); saveTeamMembers(next); setNotice("Team section updated on the website."); }
+  function moveTeamMember(id: string, direction: -1 | 1) {
+    const index = teamMembers.findIndex((member) => member.id === id);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= teamMembers.length) return;
+    const next = [...teamMembers];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    persistTeam(next);
+  }
   function persistSiteImages(next: SiteImageRecord[]) { setSiteImages(next); saveSiteImages(next); setNotice("Page imagery updated on the website."); }
   function persistFaqs(next: FaqRecord[]) { setFaqs(next); saveFaqs(next); setNotice("FAQs updated on the website."); }
 
@@ -212,7 +222,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
 
   function renderTeam() {
     const items = teamMembers.filter((item) => !q || `${item.name} ${item.role}`.toLowerCase().includes(q));
-    return <><CollectionHeading eyebrow="About Us collection" title="Team" description="Manage the six team profiles shown in the draggable About Us carousel." action="View About Us" onAction={() => window.open("/about#about-team-title", "_blank", "noopener,noreferrer")} /><div className="admin-toolbar"><SearchBox query={query} setQuery={setQuery} label="Search team members" /></div><div className="admin-card-grid admin-team-card-grid">{items.map((item) => <article className="admin-content-card admin-team-card" key={item.id}><div className="admin-team-card-person">{item.image ? <img src={item.image} alt="" style={{ objectPosition: `${item.focalPoint.x}% ${item.focalPoint.y}%` }} /> : <span className="admin-team-placeholder">LF</span>}<div><strong>{item.name}</strong><small>{item.role}</small></div></div><div><button onClick={() => setEditor({ kind: "team", item })}>Edit profile</button></div></article>)}</div></>;
+    return <><CollectionHeading eyebrow="About Us collection" title="Team" description="Manage and reorder the six profiles shown in the draggable About Us carousel." action="View About Us" onAction={() => window.open("/about#about-team-title", "_blank", "noopener,noreferrer")} /><div className="admin-toolbar"><SearchBox query={query} setQuery={setQuery} label="Search team members" /></div><div className="admin-card-grid admin-team-card-grid">{items.map((item) => { const position = teamMembers.findIndex((member) => member.id === item.id); return <article className="admin-content-card admin-team-card" key={item.id}><div className="admin-team-card-person">{item.image ? <img src={item.image} alt="" style={{ objectPosition: `${item.focalPoint.x}% ${item.focalPoint.y}%` }} /> : <span className="admin-team-placeholder">LF</span>}<div><strong>{item.name}</strong><small>{item.role}</small><span className="admin-team-position">Position {position + 1}</span></div></div><div className="admin-team-actions"><button onClick={() => setEditor({ kind: "team", item })}>Edit profile</button><span className="admin-team-order" aria-label={`Reorder ${item.name}`}><button type="button" onClick={() => moveTeamMember(item.id, -1)} disabled={position === 0} aria-label={`Move ${item.name} earlier`}><CaretUp size={17} weight="bold" /></button><button type="button" onClick={() => moveTeamMember(item.id, 1)} disabled={position === teamMembers.length - 1} aria-label={`Move ${item.name} later`}><CaretDown size={17} weight="bold" /></button></span></div></article>; })}</div></>;
   }
 
   function renderMedia() {
@@ -238,9 +248,10 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
     </>;
   }
 
-  function renderFaqs() {
-    const items = faqs.filter((item) => !q || `${item.question} ${item.answer}`.toLowerCase().includes(q));
-    return <><CollectionHeading eyebrow="Support collection" title="FAQs" description="Keep common questions and answers useful, current and easy to understand." action="Add FAQ" onAction={() => setEditor({ kind: "faq", item: blankFaq() })} /><div className="admin-toolbar"><SearchBox query={query} setQuery={setQuery} label="Search FAQs" /></div><div className="admin-faq-list">{items.map((item, index) => <article key={item.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{item.question}</strong><p>{item.answer}</p></div><em className={`admin-status ${item.status.toLowerCase()}`}>{item.status}</em><div className="admin-row-actions"><button onClick={() => setEditor({ kind: "faq", item })}>Edit</button><button className="danger" onClick={() => deleteItem("faq", item.id)}>Delete</button></div></article>)}</div></>;
+  function renderFaqs(page: FaqRecord["page"]) {
+    const items = faqs.filter((item) => item.page === page && (!q || `${item.question} ${item.answer}`.toLowerCase().includes(q)));
+    const isPodium = page === "Lens Podium";
+    return <><CollectionHeading eyebrow={isPodium ? "LENS the Podium collection" : "Support collection"} title={isPodium ? "Podium FAQs" : "FAQs"} description={isPodium ? "Manage the questions shown below the LENS the Podium application form." : "Keep common questions and answers useful, current and easy to understand."} action="Add FAQ" onAction={() => setEditor({ kind: "faq", item: blankFaq(page) })} /><div className="admin-toolbar"><SearchBox query={query} setQuery={setQuery} label={`Search ${isPodium ? "Podium " : ""}FAQs`} /></div><div className="admin-faq-list">{items.map((item, index) => <article key={item.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{item.question}</strong><p>{item.answer}</p></div><em className={`admin-status ${item.status.toLowerCase()}`}>{item.status}</em><div className="admin-row-actions"><button onClick={() => setEditor({ kind: "faq", item })}>Edit</button><button className="danger" onClick={() => deleteItem("faq", item.id)}>Delete</button></div></article>)}</div></>;
   }
 
   return (
@@ -253,7 +264,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
       {menuOpen && <button className="admin-menu-scrim" aria-label="Close menu" onClick={() => setMenuOpen(false)} />}
       <div className="admin-workspace">
         <header className="admin-topbar"><button className="admin-menu-button" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><List size={24} /></button><span>{navItems.find((item) => item.id === section)?.label}</span><a href="/" target="_blank" rel="noreferrer">View website <ArrowSquareOut size={18} /></a></header>
-        <main className="admin-content">{section === "overview" ? renderOverview() : section === "events" ? renderEvents() : section === "reports" ? renderReports() : section === "testimonials" ? renderTestimonials() : section === "team" ? renderTeam() : section === "media" ? renderMedia() : renderFaqs()}</main>
+        <main className="admin-content">{section === "overview" ? renderOverview() : section === "events" ? renderEvents() : section === "reports" ? renderReports() : section === "testimonials" ? renderTestimonials() : section === "team" ? renderTeam() : section === "media" ? renderMedia() : section === "podium-faqs" ? renderFaqs("Lens Podium") : renderFaqs("Home")}</main>
       </div>
       {editor && <EditorModal editor={editor} events={events} reports={reports} testimonials={testimonials} faqs={faqs} close={() => setEditor(null)} saveEvent={(item) => { persistEvents(events.some((record) => record.id === item.id) ? events.map((record) => record.id === item.id ? item : record) : [item, ...events]); setEditor(null); }} saveReport={(item) => { persistReports(reports.some((record) => record.id === item.id) ? reports.map((record) => record.id === item.id ? item : record) : [item, ...reports]); setEditor(null); }} saveTestimonial={(item) => { persistTestimonials(testimonials.some((record) => record.id === item.id) ? testimonials.map((record) => record.id === item.id ? item : record) : [item, ...testimonials]); setEditor(null); }} saveTeam={(item) => { persistTeam(teamMembers.map((record) => record.id === item.id ? item : record)); setEditor(null); }} saveFaq={(item) => { persistFaqs(faqs.some((record) => record.id === item.id) ? faqs.map((record) => record.id === item.id ? item : record) : [item, ...faqs]); setEditor(null); }} />}
       {notice && <div className="admin-notice" role="status"><Check size={18} weight="bold" />{notice}</div>}

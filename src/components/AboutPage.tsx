@@ -28,9 +28,9 @@ function OurStoryVideo() {
         </header>
         <div className="about-video-frame">
           <iframe
-            src="https://www.youtube.com/embed/-9kt-4WqOD0?si=W4dpog0RmfuOhm2b"
-            title="The Lens Foundation story"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            src="https://www.youtube-nocookie.com/embed/-9kt-4WqOD0?rel=0&playsinline=1"
+            title="Lens Foundation — Indigenous Welcome"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />

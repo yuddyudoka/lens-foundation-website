@@ -1,8 +1,9 @@
 import { Hand, Lightbulb, Target } from "@phosphor-icons/react";
 import { getSiteImage } from "../data/cms";
-import { FinalCta } from "./FinalCta";
+import { Faq } from "./Faq";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
+import { PodiumApplicationForm } from "./PodiumApplicationForm";
 
 const programmePillars = [
   {
@@ -34,6 +35,17 @@ const outcomes = [
 function PodiumHero() {
   return (
     <section className="podium-hero" data-node-id="243:3814" aria-labelledby="podium-page-title">
+      <video
+        className="podium-hero-video"
+        src="/assets/lens-podium-hero.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+      />
+      <div className="podium-hero-overlay" aria-hidden="true" />
       <div className="content-wrapper podium-hero-content">
         <p>~LENS THE PODIUM~</p>
         <h1 id="podium-page-title">Giving teenagers a voice that leads</h1>
@@ -140,14 +152,8 @@ export function LensPodiumPage() {
         <ProgrammeOverview />
         <ProgrammeDetails />
         <InclusiveSection />
-        <FinalCta
-          nodeId="243:3882"
-          title="Help launch the voices that will lead in 2027"
-          description="LENS the Podium launches in 2027. Support the first cohort, host a training session, mentor a young speaker, or partner with us to help teenagers prepare to speak, inspire, and lead."
-          primaryLabel="Contact Us"
-          primaryHref="/contact"
-          secondaryLabel={null}
-        />
+        <Faq page="Lens Podium" title="LENS the Podium questions, answered" />
+        <PodiumApplicationForm />
       </main>
       <Footer />
     </>

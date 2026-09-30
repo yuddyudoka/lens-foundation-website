@@ -154,7 +154,7 @@ function groqAiPlugin(apiKey: string, model: string, isAuthenticated: (request: 
   };
 }
 
-type WebsiteFormKind = "contact" | "volunteer" | "partner";
+type WebsiteFormKind = "contact" | "volunteer" | "partner" | "podium";
 
 const senderFieldNames: Record<WebsiteFormKind, Record<string, string>> = {
   contact: {
@@ -184,6 +184,22 @@ const senderFieldNames: Record<WebsiteFormKind, Record<string, string>> = {
     contactTime: "lens_partner_contact_time",
     heardFrom: "lens_partner_heard_from",
     message: "lens_partner_message",
+  },
+  podium: {
+    age: "lens_podium_age",
+    gender: "lens_podium_gender",
+    gradeLevel: "lens_podium_grade_level",
+    school: "lens_podium_school",
+    guardianName: "lens_podium_guardian_name",
+    guardianEmail: "lens_podium_guardian_email",
+    guardianPhone: "lens_podium_guardian_phone",
+    aboutYourself: "lens_podium_about_yourself",
+    motivation: "lens_podium_motivation",
+    previousSpeakingExperience: "lens_podium_previous_experience",
+    speakingDetails: "lens_podium_experience_details",
+    guardianConsent: "lens_podium_guardian_consent",
+    mediaConsent: "lens_podium_media_consent",
+    additionalInformation: "lens_podium_additional_information",
   },
 };
 
@@ -228,6 +244,7 @@ function senderFormsPlugin(token: string, groupIds: Record<WebsiteFormKind, stri
           contact: ["fullName", "email", "subject", "message"],
           volunteer: ["firstName", "surname", "email", "sex", "birthMonth", "birthDay", "nationality", "currentLocation", "phone", "preferredChapter", "education", "profession", "contribution"],
           partner: ["partnerType", "fullName", "email", "phone", "location", "contactMode", "heardFrom"],
+          podium: ["fullName", "email", "age", "gender", "gradeLevel", "aboutYourself", "motivation", "previousSpeakingExperience", "mediaConsent"],
         };
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || requiredByKind[kind].some((field) => !read(field))) {
           response.statusCode = 400;
@@ -239,9 +256,27 @@ function senderFormsPlugin(token: string, groupIds: Record<WebsiteFormKind, stri
           response.end(JSON.stringify({ error: "Please tell us about your organization." }));
           return;
         }
+        if (kind === "podium") {
+          const age = Number(read("age"));
+          if (!Number.isInteger(age) || age < 11 || age > 19) {
+            response.statusCode = 400;
+            response.end(JSON.stringify({ error: "The participant must be between 11 and 19 years old." }));
+            return;
+          }
+          if (age < 18 && ["guardianName", "guardianEmail", "guardianPhone", "guardianConsent"].some((field) => !read(field))) {
+            response.statusCode = 400;
+            response.end(JSON.stringify({ error: "A parent or legal guardian must provide their details and consent for applicants under 18." }));
+            return;
+          }
+          if (age < 18 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(read("guardianEmail"))) {
+            response.statusCode = 400;
+            response.end(JSON.stringify({ error: "Please enter a valid guardian email address." }));
+            return;
+          }
+        }
         const firstName = kind === "volunteer" ? read("firstName") : name.split(/\s+/)[0];
         const lastName = kind === "volunteer" ? read("surname") : name.split(/\s+/).slice(1).join(" ");
-        const phone = read("phone");
+        const phone = kind === "podium" ? read("guardianPhone") : read("phone");
         const senderPhone = /^\+[1-9]\d{7,14}$/.test(phone) ? { phone } : {};
         const fields: Record<string, string> = { "{$lens_form_type}": kind };
         for (const [formName, senderName] of Object.entries(senderFieldNames[kind])) {
@@ -279,7 +314,7 @@ function senderFormsPlugin(token: string, groupIds: Record<WebsiteFormKind, stri
             ...(existingData.data?.subscriber_tags || []).map((group) => group.id).filter((id): id is string => Boolean(id)),
             groupIds[kind],
           ]));
-          const fieldResponse = await senderFetch("/fields", "GET");
+          const fieldResponse = await senderFetch("/fields?limit=100", "GET");
           if (!fieldResponse.ok) throw new Error("Sender could not read the contact fields.");
           const fieldData = await fieldResponse.json() as { data?: Array<{ id?: string; name?: string }> };
           const senderNames = new Map((fieldData.data || []).map((field) => [field.id, field.name]));
@@ -338,6 +373,7 @@ export default defineConfig(({ mode }) => {
         contact: env.SENDER_CONTACT_GROUP_ID,
         volunteer: env.SENDER_VOLUNTEER_GROUP_ID,
         partner: env.SENDER_PARTNER_GROUP_ID,
+        podium: env.SENDER_PODIUM_GROUP_ID,
       }),
     ],
   };

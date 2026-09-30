@@ -976,15 +976,37 @@ button {
 }
 
 .podium-hero {
+  position: relative;
   display: flex;
   min-height: 85vh;
   align-items: flex-end;
+  overflow: hidden;
   padding-bottom: 48px;
   background: #111111;
   color: #fefefe;
 }
 
+.podium-hero-video,
+.podium-hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.podium-hero-video {
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.podium-hero-overlay {
+  background: rgba(0, 18, 24, 0.46);
+  pointer-events: none;
+}
+
 .podium-hero-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1450,6 +1472,10 @@ button {
   .podium-hero {
     min-height: 70vh;
     padding-bottom: 32px;
+  }
+
+  .podium-hero-video {
+    object-position: 50% 50%;
   }
 
   .podium-hero-content p {
@@ -2749,8 +2775,7 @@ button {
     opacity: 0;
     pointer-events: none;
     transform: translateY(-8px);
-    transition: max-height 240ms ease, padding 240ms ease, opacity 180ms ease,
-      transform 180ms ease;
+    transition: opacity 180ms ease, transform 180ms ease;
   }
 
   .mobile-nav[data-open="true"] {
@@ -2805,7 +2830,7 @@ button {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: max-height 200ms ease, opacity 160ms ease;
+    transition: opacity 160ms ease;
   }
 
   .mobile-join-options[data-open="true"] {
@@ -3695,6 +3720,14 @@ button {
 .admin-team-card-person > div { display: grid; gap: 5px; }
 .admin-team-card-person strong { font-size: 15px; font-weight: 500; }
 .admin-team-card-person small { color: var(--admin-muted); font-size: 12px; }
+.admin-team-position { color: #537075; font-size: 11px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; }
+.admin-team-actions { align-items: center; justify-content: space-between; }
+.admin-team-order { display: inline-flex; overflow: hidden; border: 1px solid #d9e5e3; border-radius: 9px; background: #f8fbfa; }
+.admin-content-card > .admin-team-actions .admin-team-order button { display: grid; width: 34px; height: 32px; place-items: center; padding: 0; color: #31565d; }
+.admin-content-card > .admin-team-actions .admin-team-order button + button { border-left: 1px solid #d9e5e3; }
+.admin-content-card > .admin-team-actions .admin-team-order button:hover:not(:disabled),
+.admin-content-card > .admin-team-actions .admin-team-order button:focus-visible { outline: none; background: #e7f4f2; color: #006d81; }
+.admin-content-card > .admin-team-actions .admin-team-order button:disabled { color: #9fb0ad; cursor: not-allowed; opacity: 0.55; }
 
 .admin-media-pages { display: grid; gap: 24px; }
 .admin-media-page { overflow: hidden; border: 1px solid var(--admin-line); border-radius: 16px; background: #fff; box-shadow: 0 8px 28px rgb(4 48 56 / 4%); }
@@ -5605,6 +5638,89 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   text-underline-offset: 3px;
 }
 
+.podium-application-section {
+  padding-block: 104px;
+  background: #f4f9f8;
+}
+
+.podium-application-form {
+  width: min(100%, 1120px);
+  box-shadow: 0 22px 56px rgb(0 67 80 / 8%);
+}
+
+.podium-guardian-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 24px;
+  border-radius: 14px;
+  background: #edf7f5;
+}
+
+.podium-guardian-fields h3,
+.podium-guardian-fields p {
+  margin: 0;
+}
+
+.podium-guardian-fields h3 {
+  color: #004350;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.podium-guardian-fields > p {
+  max-width: 72ch;
+  color: #536562;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.podium-consent-list {
+  display: grid;
+  gap: 14px;
+}
+
+.podium-consent-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #d6dfdb;
+  border-radius: 14px;
+  background: #f8faf9;
+  color: #52605d;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1.55;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.podium-consent-card:hover,
+.podium-consent-card:focus-within {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgb(0 122 145 / 12%);
+}
+
+.podium-consent-card input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  margin: 2px 0 0;
+  accent-color: var(--primary);
+}
+
+.podium-consent-card span {
+  display: grid;
+  gap: 5px;
+}
+
+.podium-consent-card strong {
+  color: #112f34;
+  font-size: 17px;
+  font-weight: 500;
+}
+
 .application-form-status {
   color: #006e7a !important;
   font-weight: 500;
@@ -5647,6 +5763,18 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
 
   .application-form {
     padding: 32px;
+  }
+
+  .podium-application-section {
+    padding-block: 72px;
+  }
+
+  .podium-application-form {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 }
 

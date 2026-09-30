@@ -29,7 +29,7 @@ export function Events() {
   const [events, setEvents] = useState<EventRecord[]>(() => getLatestEvents(fallbackEvents));
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
-  const hasCarouselNavigation = events.length > 4;
+  const [canScroll, setCanScroll] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -43,6 +43,7 @@ export function Events() {
     const rail = railRef.current;
     if (!rail) return;
     const maxScrollLeft = Math.max(0, rail.scrollWidth - rail.clientWidth);
+    setCanScroll(maxScrollLeft > 2);
     setAtStart(rail.scrollLeft <= 2);
     setAtEnd(rail.scrollLeft >= maxScrollLeft - 2);
   };
@@ -100,22 +101,22 @@ export function Events() {
         </div>
 
         <div className="events-controls events-controls-desktop" aria-label="Event carousel controls">
-          <button type="button" onClick={() => moveRail(-1)} disabled={!hasCarouselNavigation || atStart} aria-label="Previous events">
+          <button type="button" onClick={() => moveRail(-1)} disabled={!canScroll || atStart} aria-label="Previous events">
             <img className="events-arrow-previous" src="/assets/event-arrow-active.svg" alt="" />
           </button>
-          <button type="button" onClick={() => moveRail(1)} disabled={!hasCarouselNavigation || atEnd} aria-label="Next events">
+          <button type="button" onClick={() => moveRail(1)} disabled={!canScroll || atEnd} aria-label="Next events">
             <img src="/assets/event-arrow-active.svg" alt="" />
           </button>
         </div>
 
         <div className="events-footer-mobile" aria-label="Event carousel controls">
-            <button type="button" onClick={() => moveRail(-1)} disabled={!hasCarouselNavigation || atStart} aria-label="Previous events">
+            <button type="button" onClick={() => moveRail(-1)} disabled={!canScroll || atStart} aria-label="Previous events">
               <img className="events-arrow-previous" src="/assets/event-arrow-active.svg" alt="" />
             </button>
             <a className="button button-primary events-view-all" href="/events">
               View all Events
             </a>
-            <button type="button" onClick={() => moveRail(1)} disabled={!hasCarouselNavigation || atEnd} aria-label="Next events">
+            <button type="button" onClick={() => moveRail(1)} disabled={!canScroll || atEnd} aria-label="Next events">
               <img src="/assets/event-arrow-active.svg" alt="" />
             </button>
         </div>
