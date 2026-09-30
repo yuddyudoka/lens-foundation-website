@@ -154,10 +154,191 @@ function groqAiPlugin(apiKey: string, model: string, isAuthenticated: (request: 
   };
 }
 
+type WebsiteFormKind = "contact" | "volunteer" | "partner";
+
+const senderFieldNames: Record<WebsiteFormKind, Record<string, string>> = {
+  contact: {
+    subject: "lens_contact_subject",
+    message: "lens_contact_message",
+  },
+  volunteer: {
+    sex: "lens_volunteer_sex",
+    birthMonth: "lens_volunteer_birth_month",
+    birthDay: "lens_volunteer_birth_day",
+    nationality: "lens_volunteer_nationality",
+    currentLocation: "lens_volunteer_current_location",
+    phone: "lens_volunteer_phone",
+    preferredChapter: "lens_volunteer_preferred_chapter",
+    education: "lens_volunteer_education",
+    profession: "lens_volunteer_profession",
+    previousOrganization: "lens_volunteer_previous_organization",
+    contribution: "lens_volunteer_contribution",
+    heardFrom: "lens_volunteer_heard_from",
+  },
+  partner: {
+    partnerType: "lens_partner_type",
+    phone: "lens_partner_phone",
+    location: "lens_partner_location",
+    aboutOrganization: "lens_partner_about_organization",
+    contactMode: "lens_partner_contact_mode",
+    contactTime: "lens_partner_contact_time",
+    heardFrom: "lens_partner_heard_from",
+    message: "lens_partner_message",
+  },
+};
+
+function senderFormsPlugin(token: string, groupIds: Record<WebsiteFormKind, string>): Plugin {
+  const attachHandler = (middlewares: { use: (path: string, handler: (request: any, response: any, next: () => void) => void) => void }) => {
+    middlewares.use("/api/forms", async (request, response, next) => {
+      if (request.method !== "POST") return next();
+      response.setHeader("Content-Type", "application/json");
+      response.setHeader("Cache-Control", "no-store");
+      const kind = String(request.url || "").split("?")[0].replace(/^\//, "") as WebsiteFormKind;
+      if (!Object.hasOwn(senderFieldNames, kind)) {
+        response.statusCode = 404;
+        response.end(JSON.stringify({ error: "This form is unavailable." }));
+        return;
+      }
+      if (!token || !groupIds[kind]) {
+        response.statusCode = 503;
+        response.end(JSON.stringify({ error: "This form is temporarily unavailable. Please try again later." }));
+        return;
+      }
+      if (!String(request.headers["content-type"] || "").startsWith("application/json")) {
+        response.statusCode = 415;
+        response.end(JSON.stringify({ error: "Unsupported form format." }));
+        return;
+      }
+
+      try {
+        let rawBody = "";
+        for await (const chunk of request) {
+          rawBody += chunk;
+          if (rawBody.length > 30_000) throw new Error("Form answers are too long.");
+        }
+        const submitted = JSON.parse(rawBody || "{}") as Record<string, unknown>;
+        if (!submitted || typeof submitted !== "object" || Array.isArray(submitted)) throw new Error("Invalid form data.");
+        const read = (name: string) => {
+          const value = submitted[name];
+          return (Array.isArray(value) ? value.map(String).join(", ") : typeof value === "string" ? value : "").trim();
+        };
+        const email = read("email").toLowerCase();
+        const name = kind === "volunteer" ? `${read("firstName")} ${read("surname")}`.trim() : read("fullName");
+        const requiredByKind: Record<WebsiteFormKind, string[]> = {
+          contact: ["fullName", "email", "subject", "message"],
+          volunteer: ["firstName", "surname", "email", "sex", "birthMonth", "birthDay", "nationality", "currentLocation", "phone", "preferredChapter", "education", "profession", "contribution"],
+          partner: ["partnerType", "fullName", "email", "phone", "location", "contactMode", "heardFrom"],
+        };
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || requiredByKind[kind].some((field) => !read(field))) {
+          response.statusCode = 400;
+          response.end(JSON.stringify({ error: "Please complete all required fields and enter a valid email address." }));
+          return;
+        }
+        if (kind === "partner" && read("partnerType") === "organization" && !read("aboutOrganization")) {
+          response.statusCode = 400;
+          response.end(JSON.stringify({ error: "Please tell us about your organization." }));
+          return;
+        }
+        const firstName = kind === "volunteer" ? read("firstName") : name.split(/\s+/)[0];
+        const lastName = kind === "volunteer" ? read("surname") : name.split(/\s+/).slice(1).join(" ");
+        const phone = read("phone");
+        const senderPhone = /^\+[1-9]\d{7,14}$/.test(phone) ? { phone } : {};
+        const fields: Record<string, string> = { "{$lens_form_type}": kind };
+        for (const [formName, senderName] of Object.entries(senderFieldNames[kind])) {
+          const value = read(formName);
+          if (value.length > 5_000) throw new Error("One of your answers is too long.");
+          if (value) fields[`{$${senderName}}`] = value;
+        }
+        const senderHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json", Accept: "application/json" };
+        const senderFetch = async (path: string, method: string, body?: unknown) => {
+          const result = await fetch(`https://api.sender.net/v2${path}`, {
+            method,
+            headers: senderHeaders,
+            body: body === undefined ? undefined : JSON.stringify(body),
+            signal: AbortSignal.timeout(15_000),
+          });
+          if (!result.ok) console.error(`Sender ${method} ${path.split("/").slice(0, 3).join("/")} failed with ${result.status}`);
+          return result;
+        };
+
+        const existing = await senderFetch(`/subscribers/${encodeURIComponent(email)}`, "GET");
+        if (existing.status === 404) {
+          const created = await senderFetch("/subscribers", "POST", {
+            email, firstname: firstName, lastname: lastName,
+            ...senderPhone, groups: [groupIds[kind]], fields, trigger_automation: false,
+          });
+          if (!created.ok) throw new Error("Sender could not save the application.");
+        } else if (existing.ok) {
+          const existingData = await existing.json() as {
+            data?: {
+              subscriber_tags?: Array<{ id?: string }>;
+              columns?: Array<{ id?: string; value?: unknown }>;
+            };
+          };
+          const groups = Array.from(new Set([
+            ...(existingData.data?.subscriber_tags || []).map((group) => group.id).filter((id): id is string => Boolean(id)),
+            groupIds[kind],
+          ]));
+          const fieldResponse = await senderFetch("/fields", "GET");
+          if (!fieldResponse.ok) throw new Error("Sender could not read the contact fields.");
+          const fieldData = await fieldResponse.json() as { data?: Array<{ id?: string; name?: string }> };
+          const senderNames = new Map((fieldData.data || []).map((field) => [field.id, field.name]));
+          const existingFields: Record<string, string> = {};
+          for (const column of existingData.data?.columns || []) {
+            const name = senderNames.get(column.id)?.match(/^\{\{([a-z0-9_]+)\}\}$/i)?.[1];
+            if (name && column.value !== null && column.value !== undefined) {
+              existingFields[`{$${name}}`] = String(column.value);
+            }
+          }
+          const updated = await senderFetch(`/subscribers/${encodeURIComponent(email)}`, "PATCH", {
+            firstname: firstName, lastname: lastName, ...senderPhone, groups,
+            fields: { ...existingFields, ...fields }, trigger_automation: false,
+          });
+          if (!updated.ok) throw new Error("Sender could not update the application.");
+        } else {
+          throw new Error("Sender could not check the contact.");
+        }
+
+        // Each new submission is retained as an event even if the same person submits again.
+        const properties: Record<string, string> = { form: kind, name };
+        for (const field of Object.keys(senderFieldNames[kind])) {
+          const value = read(field);
+          if (value) properties[field] = value.slice(0, 1_800);
+        }
+        const eventSaved = await senderFetch("/events", "POST", {
+          subscriber: { email }, type: `lens_${kind}_submitted`, properties,
+        });
+        if (!eventSaved.ok) console.error(`Sender saved ${kind} subscriber details but could not record the submission event.`);
+
+        response.statusCode = 200;
+        response.end(JSON.stringify({ success: true }));
+      } catch (error) {
+        const isValidationError = error instanceof SyntaxError || (error instanceof Error && /too long|Invalid form/.test(error.message));
+        response.statusCode = isValidationError ? 400 : 502;
+        response.end(JSON.stringify({ error: isValidationError ? "Please check your answers and try again." : "We could not send your form right now. Please try again shortly." }));
+      }
+    });
+  };
+  return {
+    name: "lens-sender-forms",
+    configureServer(server) { attachHandler(server.middlewares); },
+    configurePreviewServer(server) { attachHandler(server.middlewares); },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "");
   const adminAuth = adminAuthPlugin(env.ADMIN_PASSWORD);
   return {
-    plugins: [react(), adminAuth.plugin, groqAiPlugin(env.GROQ_API_KEY, env.GROQ_MODEL || "openai/gpt-oss-20b", adminAuth.isAuthenticated)],
+    plugins: [
+      react(),
+      adminAuth.plugin,
+      groqAiPlugin(env.GROQ_API_KEY, env.GROQ_MODEL || "openai/gpt-oss-20b", adminAuth.isAuthenticated),
+      senderFormsPlugin(env.SENDER_API_TOKEN, {
+        contact: env.SENDER_CONTACT_GROUP_ID,
+        volunteer: env.SENDER_VOLUNTEER_GROUP_ID,
+        partner: env.SENDER_PARTNER_GROUP_ID,
+      }),
+    ],
   };
 });

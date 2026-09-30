@@ -64,21 +64,21 @@ export const defaultTestimonials: TestimonialRecord[] = [
 ];
 
 export const defaultSiteImages: SiteImageRecord[] = [
-  { id: "home-hero", page: "Home", label: "Homepage hero", description: "Main image behind the homepage introduction.", image: "/assets/hero-team-1.jpg", alt: "Members of The Lens Foundation team standing together", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "home-hero", page: "Home", label: "Homepage hero", description: "Main image behind the homepage introduction.", image: "/assets/hero-team-1.jpg", alt: "Members of The Lens Foundation team standing together", focalPoint: { x: 50, y: 20 }, aspect: "landscape" },
   { id: "home-impact-community", page: "Home", label: "Impact — community", description: "Community photograph in the Our Impact section.", image: "/assets/impact-community.jpg", alt: "Lens Foundation team members with children in the community", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
   { id: "home-impact-outreach", page: "Home", label: "Impact — outreach", description: "Outreach photograph in the featured impact card.", image: "/assets/impact-outreach.jpg", alt: "Lens Foundation volunteers preparing supplies during an outreach", focalPoint: { x: 50, y: 50 }, aspect: "portrait" },
   { id: "home-volunteer-cta", page: "Home", label: "Volunteer call-to-action", description: "Background photograph behind the volunteer invitation.", image: "/assets/volunteer-cta-background.png", alt: "Lens Foundation volunteers during a community outreach", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
-  { id: "about-hero", page: "About Us", label: "About Us hero", description: "Main image at the top of the About Us page.", image: "/assets/events-page-hero.png", alt: "Lens Foundation volunteers standing together", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "about-hero", page: "About Us", label: "About Us hero", description: "Main image at the top of the About Us page.", image: "/assets/about-page-hero.png", alt: "Lens Foundation team members standing together at a community event", focalPoint: { x: 50, y: 30 }, aspect: "landscape" },
   { id: "about-mission", page: "About Us", label: "Mission image", description: "Supporting image beside the mission statement.", image: "/assets/impact-outreach.jpg", alt: "Lens Foundation volunteers preparing outreach supplies", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
   { id: "about-vision", page: "About Us", label: "Vision image", description: "Supporting image beside the vision statement.", image: "/assets/impact-community.jpg", alt: "Lens Foundation volunteers with school children", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
   { id: "about-founder", page: "About Us", label: "Founder portrait", description: "Portrait shown beside the founder's message.", image: "/assets/team-omobolanle-sodiya.jpg", alt: "Omobolanle Sodiya, Founding Director of The Lens Foundation", focalPoint: { x: 50, y: 35 }, aspect: "portrait" },
-  { id: "events-hero", page: "Events", label: "Events hero", description: "Main image at the top of the Events page.", image: "/assets/events-page-hero.png", alt: "Lens Foundation team members gathered at a community event", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
+  { id: "events-hero", page: "Events", label: "Events hero", description: "Main image at the top of the Events page.", image: "/assets/events-page-hero.png", alt: "Lens Foundation team members gathered at a community event", focalPoint: { x: 50, y: 20 }, aspect: "landscape" },
   { id: "podium-skills", page: "Lens Podium", label: "Participant outcomes", description: "Supporting visual for what participants will gain.", image: "/assets/podium-skills.png", alt: "Teens public speaking and sign language bootcamp programme artwork", focalPoint: { x: 50, y: 50 }, aspect: "portrait" },
   { id: "podium-training", page: "Lens Podium", label: "Programme format", description: "Supporting visual for how the programme works.", image: "/assets/podium-training.png", alt: "Lens the Podium communication and leadership word cloud", focalPoint: { x: 50, y: 50 }, aspect: "landscape" },
   { id: "podium-inclusive", page: "Lens Podium", label: "Inclusive programme visual", description: "Main visual in the inclusive programme section.", image: "/assets/podium-inclusive.png", alt: "Lens the Podium raised-fist microphone logo", focalPoint: { x: 50, y: 50 }, aspect: "square" },
-  { id: "volunteer-hero", page: "Volunteer", label: "Volunteer hero", description: "Main image at the top of the volunteer application page.", image: "/assets/volunteer-hero.png", alt: "Lens Foundation community outreach participants", focalPoint: { x: 50, y: 42 }, aspect: "landscape" },
-  { id: "partner-hero", page: "Partner", label: "Partner hero", description: "Main image at the top of the partnership application page.", image: "/assets/partner-hero.png", alt: "Lens Foundation community outreach participants", focalPoint: { x: 50, y: 46 }, aspect: "landscape" },
-  { id: "contact-hero", page: "Contact Us", label: "Contact Us hero", description: "Main image at the top of the Contact Us page.", image: "/assets/contact-hero.png", alt: "Lens Foundation team members standing together", focalPoint: { x: 50, y: 23 }, aspect: "landscape" },
+  { id: "volunteer-hero", page: "Volunteer", label: "Volunteer hero", description: "Main image at the top of the volunteer application page.", image: "/assets/volunteer-hero.png", alt: "Lens Foundation community outreach participants", focalPoint: { x: 50, y: 18 }, aspect: "landscape" },
+  { id: "partner-hero", page: "Partner", label: "Partner hero", description: "Main image at the top of the partnership application page.", image: "/assets/partner-hero.png", alt: "Lens Foundation community outreach participants", focalPoint: { x: 50, y: 38 }, aspect: "landscape" },
+  { id: "contact-hero", page: "Contact Us", label: "Contact Us hero", description: "Main image at the top of the Contact Us page.", image: "/assets/contact-hero.png", alt: "Lens Foundation team members standing together", focalPoint: { x: 50, y: 35 }, aspect: "landscape" },
 ];
 
 export const defaultTeamMembers: TeamMemberRecord[] = [
@@ -159,10 +159,39 @@ export const getTestimonials = () => readCollection(storageKeys.testimonials, de
 export const saveTestimonials = (records: TestimonialRecord[]) => saveCollection(storageKeys.testimonials, records);
 export const getFaqs = () => readCollection(storageKeys.faqs, defaultFaqs);
 export const saveFaqs = (records: FaqRecord[]) => saveCollection(storageKeys.faqs, records);
-export const getSiteImages = () => readCollection(storageKeys.siteImages, defaultSiteImages).map((record) => ({
-  ...record,
-  focalPoint: record.focalPoint ?? { x: 50, y: 50 },
-}));
+const previousHeroDefaults: Record<string, Array<{ image: string; y: number }>> = {
+  "home-hero": [{ image: "/assets/hero-team-1.jpg", y: 50 }],
+  "about-hero": [
+    { image: "/assets/events-page-hero.png", y: 50 },
+    { image: "/assets/hero-team-1.jpg", y: 0 },
+  ],
+  "events-hero": [
+    { image: "/assets/events-page-hero.png", y: 50 },
+    { image: "/assets/events-page-hero.png", y: 0 },
+  ],
+  "volunteer-hero": [
+    { image: "/assets/volunteer-hero.png", y: 42 },
+    { image: "/assets/volunteer-hero.png", y: 0 },
+  ],
+  "partner-hero": [
+    { image: "/assets/partner-hero.png", y: 46 },
+    { image: "/assets/partner-hero.png", y: 0 },
+  ],
+  "contact-hero": [
+    { image: "/assets/contact-hero.png", y: 23 },
+    { image: "/assets/contact-hero.png", y: 0 },
+  ],
+};
+export const getSiteImages = () => readCollection(storageKeys.siteImages, defaultSiteImages).map((record) => {
+  const previous = previousHeroDefaults[record.id] ?? [];
+  const updatedDefault = defaultSiteImages.find((image) => image.id === record.id);
+  // Refresh only untouched legacy defaults; preserve admin-uploaded images and custom focal points.
+  const isUntouchedLegacyDefault = previous.some((legacy) => record.image === legacy.image && record.focalPoint?.x === 50 && record.focalPoint.y === legacy.y);
+  if (isUntouchedLegacyDefault && updatedDefault) {
+    return { ...record, image: updatedDefault.image, alt: updatedDefault.alt, focalPoint: updatedDefault.focalPoint };
+  }
+  return { ...record, focalPoint: record.focalPoint ?? { x: 50, y: 50 } };
+});
 export const getSiteImage = (id: string) => getSiteImages().find((record) => record.id === id) ?? defaultSiteImages.find((record) => record.id === id)!;
 export const saveSiteImages = (records: SiteImageRecord[]) => saveCollection(storageKeys.siteImages, records);
 export const getTeamMembers = () => readCollection(storageKeys.team, defaultTeamMembers).map((record) => ({

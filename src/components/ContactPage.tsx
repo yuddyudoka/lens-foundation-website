@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getSiteImage } from "../data/cms";
+import { submitSiteForm } from "../data/formSubmission";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 
@@ -59,6 +60,8 @@ function ContactHero() {
 
 function ContactInformation() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [subject, setSubject] = useState("");
   const [subjectOpen, setSubjectOpen] = useState(false);
   const [subjectError, setSubjectError] = useState(false);
@@ -119,8 +122,9 @@ function ContactInformation() {
         <form
           className="contact-form"
           aria-labelledby="contact-form-title"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
+            if (submitting) return;
             if (!subject) {
               setSubjectError(true);
               setSubmitted(false);
@@ -128,7 +132,17 @@ function ContactInformation() {
               return;
             }
             setSubjectError(false);
-            setSubmitted(true);
+            setSubmitting(true);
+            setSubmitted(false);
+            setSubmitError("");
+            try {
+              await submitSiteForm("contact", event.currentTarget);
+              setSubmitted(true);
+            } catch (cause) {
+              setSubmitError(cause instanceof Error ? cause.message : "Your message could not be sent.");
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
           <div className="contact-form-heading">
@@ -203,9 +217,10 @@ function ContactInformation() {
             <textarea name="message" placeholder="Write your message here..." required />
           </label>
 
-          <button className="button button-primary contact-submit" type="submit">Send Message</button>
+          <button className="button button-primary contact-submit" type="submit" disabled={submitting}>{submitting ? "Sending…" : "Send Message"}</button>
           <p className="contact-consent">By submitting this form, you agree that we may use your details to respond to your enquiry.</p>
-          {submitted && <p className="contact-form-status" role="status">Thank you. Your message is ready to be connected to the form service.</p>}
+          {submitted && <p className="contact-form-status" role="status">Thank you. Your message has been received.</p>}
+          {submitError && <p className="contact-form-status" role="alert">{submitError}</p>}
         </form>
       </div>
     </section>

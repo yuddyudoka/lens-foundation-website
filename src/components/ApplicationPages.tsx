@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
 import { getSiteImage } from "../data/cms";
+import { submitSiteForm } from "../data/formSubmission";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 
@@ -156,22 +157,36 @@ function ApplicationHero({
   );
 }
 
-function SubmitArea({ submitted }: { submitted: boolean }) {
+function SubmitArea({ submitted, submitting, error }: { submitted: boolean; submitting: boolean; error: string }) {
   return (
     <div className="application-submit-area">
-      <button className="button button-primary application-submit" type="submit">Submit application</button>
+      <button className="button button-primary application-submit" type="submit" disabled={submitting}>{submitting ? "Sending…" : "Submit application"}</button>
       <p>Questions before applying? <a href="/contact">Contact The Lens Foundation</a> team for guidance.</p>
-      {submitted && <p className="application-form-status" role="status">Thank you. Your application is ready to be connected to the form service.</p>}
+      {submitted && <p className="application-form-status" role="status">Thank you. Your application has been received.</p>}
+      {error && <p className="application-form-status" role="alert">{error}</p>}
     </div>
   );
 }
 
 function VolunteerForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmitted(false);
+    setError("");
+    try {
+      await submitSiteForm("volunteer", event.currentTarget);
+      setSubmitted(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Your application could not be sent.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -230,7 +245,7 @@ function VolunteerForm() {
           </fieldset>
         </section>
 
-        <SubmitArea submitted={submitted} />
+        <SubmitArea submitted={submitted} submitting={submitting} error={error} />
       </form>
     </section>
   );
@@ -240,6 +255,8 @@ function PartnerForm() {
   const [partnerType, setPartnerType] = useState<"organization" | "individual">("organization");
   const [partnerTypeOpen, setPartnerTypeOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const partnerTypeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -257,9 +274,20 @@ function PartnerForm() {
     };
   }, []);
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmitted(false);
+    setError("");
+    try {
+      await submitSiteForm("partner", event.currentTarget);
+      setSubmitted(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Your application could not be sent.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -327,7 +355,7 @@ function PartnerForm() {
           <Field label="Additional Message" name="message" optional multiline placeholder="Share anything else you would like us to know" />
         </section>
 
-        <SubmitArea submitted={submitted} />
+        <SubmitArea submitted={submitted} submitting={submitting} error={error} />
       </form>
     </section>
   );

@@ -5549,6 +5549,14 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   transform: translateY(0);
 }
 
+.application-birthday .application-custom-options {
+  max-height: min(280px, 40vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #8bb9b8 #eef7f6;
+  scrollbar-width: thin;
+}
+
 .application-custom-options button {
   min-height: 44px;
   padding: 10px 12px;
