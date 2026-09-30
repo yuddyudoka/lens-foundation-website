@@ -2256,6 +2256,13 @@ button {
   max-width: 460px;
 }
 
+@media (min-width: 901px) {
+  .podium-page .faq-heading {
+    position: sticky;
+    top: 116px;
+  }
+}
+
 .faq-content {
   display: flex;
   min-width: 0;

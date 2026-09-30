@@ -146,7 +146,7 @@ function InclusiveSection() {
 export function LensPodiumPage() {
   return (
     <>
-      <Navbar solid />
+      <Navbar />
       <main className="podium-page">
         <PodiumHero />
         <ProgrammeOverview />
