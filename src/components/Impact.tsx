@@ -1,3 +1,5 @@
+import { getSiteImage } from "../data/cms";
+
 const avatars = [
   "/assets/impact-avatar-1.png",
   "/assets/impact-avatar-2.png",
@@ -55,12 +57,12 @@ export function Impact() {
             </article>
 
             <figure className="impact-card impact-photo-card">
-              <img src={communityImage.image} alt={communityImage.alt} style={{ objectPosition: `${communityImage.focalPoint.x}% ${communityImage.focalPoint.y}%` }} />
+              <img src={communityImage.image} alt={communityImage.alt} loading="lazy" />
             </figure>
           </div>
 
           <article className="impact-feature-card">
-            <img src={outreachImage.image} alt={outreachImage.alt} style={{ objectPosition: `${outreachImage.focalPoint.x}% ${outreachImage.focalPoint.y}%` }} />
+            <img src={outreachImage.image} alt={outreachImage.alt} loading="lazy" style={{ objectPosition: `${outreachImage.focalPoint.x}% ${outreachImage.focalPoint.y}%` }} />
             <div className="impact-feature-copy">
               <strong>₦450K</strong>
               <h3>Direct Street Support</h3>
@@ -72,4 +74,3 @@ export function Impact() {
     </section>
   );
 }
-import { getSiteImage } from "../data/cms";

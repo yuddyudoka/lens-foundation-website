@@ -19,15 +19,15 @@ export function FinalCta({
 }: FinalCtaProps = {}) {
   return (
     <section className="final-cta" aria-labelledby="final-cta-title" data-node-id={nodeId}>
-      <img className="final-cta-world" src="/assets/final-cta-world.png" alt="" />
+      <img className="final-cta-world" src="/assets/final-cta-world-v1.webp" alt="" loading="lazy" />
 
       <div className="final-cta-decoration final-cta-person final-cta-person-one" aria-hidden="true">
-        <img src="/assets/final-cta-person-1.png" alt="" />
+        <img src="/assets/final-cta-person-1-v1.webp" alt="" loading="lazy" />
       </div>
       <img className="final-cta-decoration final-cta-gift" src="/assets/final-cta-gift.svg" alt="" />
       <img className="final-cta-decoration final-cta-giving" src="/assets/final-cta-giving.svg" alt="" />
       <div className="final-cta-decoration final-cta-person final-cta-person-two" aria-hidden="true">
-        <img src="/assets/final-cta-person-2.png" alt="" />
+        <img src="/assets/final-cta-person-2-v1.webp" alt="" loading="lazy" />
       </div>
 
       <div className="content-wrapper final-cta-layout">

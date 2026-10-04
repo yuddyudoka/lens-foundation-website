@@ -8,7 +8,7 @@ export function Testimonials() {
         <article className="testimonial-card" key={`${duplicate ? "duplicate-" : ""}${testimonial.name}`}>
           <blockquote>“{testimonial.quote}”</blockquote>
           <footer className="testimonial-person">
-            <img src={testimonial.image} alt="" style={{ objectPosition: `${testimonial.focalPoint?.x ?? 50}% ${testimonial.focalPoint?.y ?? 50}%` }} />
+            <img src={testimonial.image} alt="" loading="lazy" style={{ objectPosition: `${testimonial.focalPoint?.x ?? 50}% ${testimonial.focalPoint?.y ?? 50}%` }} />
             <div>
               <strong>{testimonial.name}</strong>
               <span>{testimonial.role}</span>

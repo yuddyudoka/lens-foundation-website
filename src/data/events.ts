@@ -3,6 +3,19 @@ export type ChapterFilter = "All" | Chapter;
 export type EventStatus = "Upcoming" | "Completed";
 export type EventFilter = "All" | EventStatus;
 
+const optimizedEventImages: Record<string, string> = {
+  "/assets/event-community-chair-gift.png": "/assets/event-community-chair-gift-v1.webp",
+  "/assets/event-makoko-food-outreach.png": "/assets/event-makoko-food-outreach-v1.webp",
+  "/assets/event-street-support-drive.png": "/assets/event-street-support-drive-v1.webp",
+  "/assets/event-hospital-care-visit.png": "/assets/event-hospital-care-visit-v1.webp",
+};
+
+const optimizeEventImages = (records: EventRecord[]) => records.map((event) => ({
+  ...event,
+  image: optimizedEventImages[event.image] ?? event.image,
+  details: event.details?.image ? { ...event.details, image: optimizedEventImages[event.details.image] ?? event.details.image } : event.details,
+}));
+
 export type EventDetailContent = {
   summary: string;
   overview: string;
@@ -143,19 +156,19 @@ export async function loadEvents(): Promise<EventRecord[]> {
           const migratedRecords = [...mergedRecords.values()];
           window.localStorage.setItem("lens-cms-events-v1", JSON.stringify(migratedRecords));
           window.localStorage.setItem("lens-cms-events-seeded-v2", "true");
-          return hydrateEventDetails(migratedRecords);
+          return hydrateEventDetails(optimizeEventImages(migratedRecords));
         }
-        return hydrateEventDetails(localRecords);
+        return hydrateEventDetails(optimizeEventImages(localRecords));
       }
     } catch {
       // Fall through to the bundled records when local CMS data is unavailable.
     }
-    return hydrateEventDetails(fallbackEvents);
+    return hydrateEventDetails(optimizeEventImages(fallbackEvents));
   }
 
   try {
     const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
-    if (!response.ok) return hydrateEventDetails(fallbackEvents);
+    if (!response.ok) return hydrateEventDetails(optimizeEventImages(fallbackEvents));
     const payload: unknown = await response.json();
     const records = Array.isArray(payload)
       ? payload
@@ -163,8 +176,8 @@ export async function loadEvents(): Promise<EventRecord[]> {
         ? (payload as { items: unknown[] }).items
         : [];
     const validRecords = records.filter(isEventRecord);
-    return hydrateEventDetails(validRecords.length > 0 ? validRecords : fallbackEvents);
+    return hydrateEventDetails(optimizeEventImages(validRecords.length > 0 ? validRecords : fallbackEvents));
   } catch {
-    return hydrateEventDetails(fallbackEvents);
+    return hydrateEventDetails(optimizeEventImages(fallbackEvents));
   }
 }

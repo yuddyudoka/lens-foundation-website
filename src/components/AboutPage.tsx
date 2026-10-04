@@ -19,6 +19,19 @@ function AboutHero() {
 }
 
 function OurStoryVideo() {
+  const [playing, setPlaying] = useState(false);
+  const warmYouTubeConnection = () => {
+    if (document.querySelector('link[data-youtube-preconnect="true"]')) return;
+    for (const href of ["https://www.youtube-nocookie.com", "https://i.ytimg.com"]) {
+      const link = document.createElement("link");
+      link.rel = "preconnect";
+      link.href = href;
+      link.crossOrigin = "anonymous";
+      link.dataset.youtubePreconnect = "true";
+      document.head.append(link);
+    }
+  };
+
   return (
     <section className="about-story" data-node-id="124:82" aria-labelledby="about-story-title">
       <div className="content-wrapper about-story-layout">
@@ -26,15 +39,74 @@ function OurStoryVideo() {
           <p>Our story</p>
           <h2 id="about-story-title">How compassion grew into shared action</h2>
         </header>
-        <div className="about-video-frame">
-          <iframe
-            src="https://www.youtube-nocookie.com/embed/-9kt-4WqOD0?rel=0&playsinline=1"
-            title="Lens Foundation — Indigenous Welcome"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
+        <div className="about-video-frame" data-playing={playing}>
+          {playing ? (
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/-9kt-4WqOD0?rel=0&playsinline=1&autoplay=1"
+              title="Lens Foundation — Indigenous Welcome"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          ) : (
+            <button className="about-video-poster" type="button" onPointerEnter={warmYouTubeConnection} onFocus={warmYouTubeConnection} onClick={() => { warmYouTubeConnection(); setPlaying(true); }} aria-label="Play the Lens Foundation story video">
+              <img src="/assets/about-page-hero-v1.webp" alt="Lens Foundation team members at a community event" />
+              <span className="about-video-poster-overlay" aria-hidden="true" />
+              <span className="about-video-play" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M8.25 5.8v12.4L18 12 8.25 5.8Z" fill="currentColor" /></svg>
+              </span>
+              <span className="about-video-label"><strong>Watch our story</strong><small>Video loads when you press play</small></span>
+            </button>
+          )}
         </div>
+      </div>
+    </section>
+  );
+}
+
+const impactStats: Array<{ value: number; decimals: number; prefix?: string; suffix?: string; label: string }> = [
+  { value: 3.45, decimals: 2, prefix: "₦", suffix: "M", label: "invested in community outreach" },
+  { value: 300, decimals: 0, suffix: "+", label: "households reached with practical support" },
+  { value: 4, decimals: 0, label: "active chapters connecting our communities" },
+  { value: 6, decimals: 0, label: "core values guiding every action" },
+];
+
+function ImpactRibbon() {
+  const ribbonRef = useRef<HTMLElement>(null);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const ribbon = ribbonRef.current;
+    if (!ribbon) return;
+    let frame = 0;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      const start = performance.now();
+      const duration = 1100;
+      const animate = (now: number) => {
+        const elapsed = Math.min(1, (now - start) / duration);
+        setProgress(1 - Math.pow(1 - elapsed, 4));
+        if (elapsed < 1) frame = requestAnimationFrame(animate);
+      };
+      frame = requestAnimationFrame(animate);
+    }, { threshold: 0.3 });
+    observer.observe(ribbon);
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
+  }, []);
+
+  return (
+    <section className="about-impact-ribbon" ref={ribbonRef} aria-label="Lens Foundation impact at a glance">
+      <div className="content-wrapper about-impact-ribbon-grid">
+        {impactStats.map((stat) => {
+          const numericValue = (stat.value * progress).toFixed(stat.decimals);
+          return (
+            <article key={stat.label}>
+              <strong>{stat.prefix}{numericValue}{stat.suffix}</strong>
+              <p>{stat.label}</p>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
@@ -56,13 +128,13 @@ function MissionAndVision() {
             </p>
           </div>
           <figure className="about-purpose-media">
-            <img src={missionImage.image} alt={missionImage.alt} style={{ objectPosition: `${missionImage.focalPoint.x}% ${missionImage.focalPoint.y}%` }} />
+            <img src={missionImage.image} alt={missionImage.alt} loading="lazy" style={{ objectPosition: `${missionImage.focalPoint.x}% ${missionImage.focalPoint.y}%` }} />
           </figure>
         </div>
 
         <div className="about-purpose-row about-purpose-vision">
           <figure className="about-purpose-media">
-            <img src={visionImage.image} alt={visionImage.alt} style={{ objectPosition: `${visionImage.focalPoint.x}% ${visionImage.focalPoint.y}%` }} />
+            <img src={visionImage.image} alt={visionImage.alt} loading="lazy" style={{ objectPosition: `${visionImage.focalPoint.x}% ${visionImage.focalPoint.y}%` }} />
           </figure>
           <div className="about-purpose-copy">
             <h2>Our Vision</h2>
@@ -294,6 +366,7 @@ export function AboutPage() {
         <AboutHero />
         <OurStoryVideo />
         <MissionAndVision />
+        <ImpactRibbon />
         <CoreValues />
         <FounderMessage />
         <CommunityImpactOrganogram />

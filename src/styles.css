@@ -849,6 +849,7 @@ button {
 .impact-photo-card {
   margin: 0;
   padding: 0;
+  background: #edf5f3;
 }
 
 .impact-photo-card > img,
@@ -859,7 +860,8 @@ button {
 }
 
 .impact-photo-card > img {
-  object-position: center 12%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .impact-feature-card {
@@ -2257,7 +2259,7 @@ button {
 }
 
 @media (min-width: 901px) {
-  .podium-page .faq-heading {
+  .faq-heading {
     position: sticky;
     top: 116px;
   }
@@ -4426,28 +4428,81 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   gap: 16px;
 }
 
-.calendly-embed {
+.calendly-launch-card {
+  display: grid;
+  width: min(920px, 100%);
+  min-height: 190px;
+  padding: 30px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  border-radius: 16px;
+  background: #eaf6f4;
+}
+
+.calendly-launch-mark {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #00333d;
+  color: #d7f3cb;
+  font-family: "Faculty Glyphic", sans-serif;
+  font-size: 28px;
+  place-items: center;
+}
+
+.calendly-launch-card h3,
+.calendly-launch-card p { margin: 0; }
+.calendly-launch-card h3 { margin-bottom: 7px; color: #00333d; font-size: 24px; font-weight: 500; letter-spacing: -0.03em; }
+.calendly-launch-card p { max-width: 56ch; color: #576669; font-size: 16px; line-height: 1.5; }
+.calendly-launch-button { min-width: 210px; white-space: nowrap; }
+
+.calendly-embed-shell {
+  position: relative;
   width: min(1180px, 100%);
-  min-width: 320px;
-  height: 980px;
+  height: 760px;
   overflow: hidden;
   border: 1px solid #d1e0de;
   border-radius: 18px;
-  background: #ffffff;
+  background: #f6faf9;
 }
 
-.calendly-fallback {
-  margin: 0;
-  color: #576669;
-  font-size: 15px;
-  line-height: 1.4;
-  text-align: center;
+.calendly-embed {
+  display: block;
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 240ms ease;
 }
 
-.calendly-link {
-  min-width: 220px;
-  min-height: 56px;
+.calendly-embed-shell[data-ready="true"] .calendly-embed { opacity: 1; }
+
+.calendly-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 14px;
+  color: #315257;
 }
+
+.calendly-loading span {
+  width: 38px;
+  height: 38px;
+  border: 3px solid #cce2df;
+  border-top-color: #007a91;
+  border-radius: 50%;
+  animation: calendly-spin 800ms linear infinite;
+}
+
+.calendly-loading p { margin: 0; font-size: 15px; }
+.calendly-direct-link { color: #006e7a; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; }
+@keyframes calendly-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 1000px) {
   .contact-columns {
@@ -4503,9 +4558,9 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
     gap: 32px;
   }
 
-  .calendly-embed {
-    height: 1080px;
-  }
+  .calendly-launch-card { grid-template-columns: auto 1fr; }
+  .calendly-launch-button { width: 100%; grid-column: 1 / -1; }
+  .calendly-embed-shell { height: 820px; }
 
   a.contact-detail-row .contact-detail-copy strong {
     text-decoration: underline;
@@ -4555,16 +4610,10 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
     font-size: 16px;
   }
 
-  .calendly-embed {
-    width: 100%;
-    min-width: 0;
-    height: 1180px;
-    border-radius: 14px;
-  }
-
-  .calendly-link {
-    width: 100%;
-  }
+  .calendly-launch-card { grid-template-columns: 1fr; padding: 24px 18px; text-align: left; }
+  .calendly-launch-mark { width: 60px; height: 60px; font-size: 24px; }
+  .calendly-embed-shell { height: 900px; border-radius: 14px; }
+  .calendly-embed { min-width: 0; }
 }
 
 /* About page */
@@ -4694,6 +4743,76 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   border: 0;
 }
 
+.about-video-poster {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: #00333d;
+  color: #ffffff;
+  cursor: pointer;
+  place-items: center;
+}
+
+.about-video-poster > img,
+.about-video-poster-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.about-video-poster > img {
+  object-fit: cover;
+  object-position: center 28%;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.about-video-poster-overlay {
+  background: linear-gradient(180deg, rgb(0 36 43 / 18%), rgb(0 36 43 / 72%));
+}
+
+.about-video-play,
+.about-video-label {
+  position: relative;
+  z-index: 1;
+}
+
+.about-video-play {
+  display: grid;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 18px 38px rgb(0 35 43 / 28%);
+  color: #007a91;
+  place-items: center;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+}
+
+.about-video-play svg { width: 34px; height: 34px; margin-left: 4px; }
+
+.about-video-label {
+  position: absolute;
+  right: 28px;
+  bottom: 26px;
+  left: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+}
+
+.about-video-label strong { font-size: 20px; font-weight: 500; }
+.about-video-label small { color: #dcebec; font-size: 14px; }
+.about-video-poster:hover > img { transform: scale(1.018); }
+.about-video-poster:hover .about-video-play { transform: scale(1.06); box-shadow: 0 22px 48px rgb(0 35 43 / 35%); }
+.about-video-poster:focus-visible { outline: 3px solid #63d0da; outline-offset: -5px; }
+
 .about-purpose {
   padding-block: 80px;
   background: #ffffff;
@@ -4749,6 +4868,59 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.about-impact-ribbon {
+  overflow: hidden;
+  background: #00333d;
+  color: #ffffff;
+}
+
+.about-impact-ribbon-grid {
+  display: grid;
+  min-height: 220px;
+  padding-block: 42px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.about-impact-ribbon article {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  padding: 12px 30px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.about-impact-ribbon article:first-child { padding-left: 0; }
+.about-impact-ribbon article:last-child { padding-right: 0; }
+.about-impact-ribbon article + article::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 1px;
+  background: rgb(215 243 203 / 34%);
+  content: "";
+}
+
+.about-impact-ribbon strong {
+  font-family: "Faculty Glyphic", sans-serif;
+  font-size: clamp(40px, 4vw, 62px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.about-impact-ribbon p {
+  max-width: 24ch;
+  margin: 0;
+  color: #d8e8e9;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 .about-values {
@@ -5037,6 +5209,16 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
     gap: 64px;
   }
 
+  .about-impact-ribbon-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .about-impact-ribbon article { min-height: 150px; padding: 24px; }
+  .about-impact-ribbon article:nth-child(odd) { padding-left: 0; }
+  .about-impact-ribbon article:nth-child(even) { padding-right: 0; }
+  .about-impact-ribbon article:nth-child(3)::before { display: none; }
+  .about-impact-ribbon article:nth-child(n + 3) { border-top: 1px solid rgb(215 243 203 / 34%); }
+
   .about-purpose-row {
     display: flex;
     min-height: 0;
@@ -5098,6 +5280,19 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   .about-story-layout {
     gap: 28px;
   }
+
+  .about-video-play { width: 62px; height: 62px; }
+  .about-video-play svg { width: 28px; height: 28px; }
+  .about-video-label { right: 18px; bottom: 16px; left: 18px; }
+  .about-video-label strong { font-size: 17px; }
+  .about-video-label small { font-size: 12px; }
+
+  .about-impact-ribbon-grid { grid-template-columns: 1fr; padding-block: 18px; }
+  .about-impact-ribbon article,
+  .about-impact-ribbon article:nth-child(n) { min-height: 124px; padding: 22px 0; border-top: 1px solid rgb(215 243 203 / 34%); }
+  .about-impact-ribbon article:first-child { border-top: 0; }
+  .about-impact-ribbon article + article::before { display: none; }
+  .about-impact-ribbon strong { font-size: 42px; }
 
   .about-section-heading h2,
   .about-purpose-copy h2 {
@@ -6579,7 +6774,19 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   animation: donation-modal-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
   scrollbar-width: thin;
   scrollbar-color: #9bb7b3 transparent;
+  scrollbar-gutter: stable;
 }
+
+.donation-modal::-webkit-scrollbar { width: 10px; }
+.donation-modal::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+.donation-modal::-webkit-scrollbar-track { margin-block: 18px; background: transparent; }
+.donation-modal::-webkit-scrollbar-thumb {
+  min-height: 72px;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  background: #83aba8;
+}
+.donation-modal::-webkit-scrollbar-thumb:hover { background: #497e7c; }
 
 .donation-modal h2,
 .donation-modal h3,

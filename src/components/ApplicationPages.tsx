@@ -369,7 +369,7 @@ export function VolunteerPage() {
         <ApplicationHero
           eyebrow="~VOLUNTEER~"
           title="Give your time. Help turn compassion into action."
-          image="/assets/volunteer-hero.png"
+          image="/assets/volunteer-hero-v1.webp"
           imageId="volunteer-hero"
           imageClass="volunteer-hero-image"
           nodeId="201:2960"
@@ -389,7 +389,7 @@ export function PartnerPage() {
         <ApplicationHero
           eyebrow="~PARTNERSHIP~"
           title="Bring your resources closer to real community needs."
-          image="/assets/partner-hero.png"
+          image="/assets/partner-hero-v1.webp"
           imageId="partner-hero"
           imageClass="partner-hero-image"
           nodeId="201:2929"

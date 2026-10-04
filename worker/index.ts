@@ -333,6 +333,13 @@ export default {
       ?? await handleForm(request, env, pathname);
     if (apiResponse) return apiResponse;
     if (pathname.startsWith("/api/")) return json({ error: "Not found." }, 404);
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+    if (!pathname.startsWith("/assets/") || !response.ok) return response;
+    const headers = new Headers(response.headers);
+    const versioned = /(?:-v\d+|index-[A-Za-z0-9_-]+)\.[^.]+$/.test(pathname);
+    headers.set("Cache-Control", versioned
+      ? "public, max-age=31536000, immutable"
+      : "public, max-age=86400, stale-while-revalidate=604800");
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   },
 };

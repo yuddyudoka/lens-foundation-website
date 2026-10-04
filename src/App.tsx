@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { AnnualReports } from "./components/AnnualReports";
 import { Events } from "./components/Events";
 import { Faq } from "./components/Faq";
@@ -76,9 +77,25 @@ function CurrentPage() {
 }
 
 export default function App() {
+  const [, refreshCms] = useState(0);
+  const [cmsHydrationRevision, setCmsHydrationRevision] = useState(0);
+
+  useEffect(() => {
+    const handleCmsUpdate = (event: Event) => {
+      refreshCms((value) => value + 1);
+      if ((event as CustomEvent<string>).detail === "remote-hydration") {
+        // Stateful collections (events and the admin editor) need one clean
+        // remount after the background KV snapshot arrives.
+        setCmsHydrationRevision((value) => value + 1);
+      }
+    };
+    window.addEventListener("lens-cms-updated", handleCmsUpdate);
+    return () => window.removeEventListener("lens-cms-updated", handleCmsUpdate);
+  }, []);
+
   return (
     <>
-      <CurrentPage />
+      <CurrentPage key={cmsHydrationRevision} />
       <DonationModal />
     </>
   );

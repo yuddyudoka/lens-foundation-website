@@ -228,6 +228,21 @@ function ContactInformation() {
 }
 
 function CalendlySection() {
+  const [calendarRequested, setCalendarRequested] = useState(false);
+  const [calendarReady, setCalendarReady] = useState(false);
+
+  const warmCalendlyConnection = () => {
+    if (document.querySelector('link[data-calendly-preconnect="true"]')) return;
+    for (const href of ["https://calendly.com", "https://assets.calendly.com"]) {
+      const link = document.createElement("link");
+      link.rel = "preconnect";
+      link.href = href;
+      link.crossOrigin = "anonymous";
+      link.dataset.calendlyPreconnect = "true";
+      document.head.append(link);
+    }
+  };
+
   return (
     <section className="calendly-section" data-node-id="283:1250" aria-labelledby="calendly-heading">
       <div className="content-wrapper calendly-layout">
@@ -236,19 +251,26 @@ function CalendlySection() {
           <p>Book a meeting with our team. We are happy to share more about our work, programmes, partnerships, and ways to get involved.</p>
         </div>
         <div className="calendly-booking">
-          <iframe
-            className="calendly-embed"
-            src={`${calendlyUrl}?embed_type=Inline&hide_gdpr_banner=1`}
-            title="Book a 30-minute meeting with Lens Foundation"
-            loading="lazy"
-            scrolling="no"
-          />
-          <p className="calendly-fallback">
-            If the calendar does not appear, you can book directly on Calendly.
-          </p>
-          <a className="button button-primary calendly-link" href={calendlyUrl} target="_blank" rel="noreferrer">
-            Open Calendly
-          </a>
+          {calendarRequested ? (
+            <div className="calendly-embed-shell" data-ready={calendarReady}>
+              {!calendarReady && <div className="calendly-loading" role="status"><span /><p>Loading available meeting times…</p></div>}
+              <iframe
+                className="calendly-embed"
+                src={`${calendlyUrl}?embed_type=Inline&hide_gdpr_banner=1`}
+                title="Book a 30-minute meeting with Lens Foundation"
+                onLoad={() => setCalendarReady(true)}
+              />
+            </div>
+          ) : (
+            <div className="calendly-launch-card">
+              <span className="calendly-launch-mark" aria-hidden="true">30</span>
+              <div><h3>Choose a time that works for you</h3><p>The secure Calendly scheduler will load only when you are ready to book.</p></div>
+              <button className="button button-primary calendly-launch-button" type="button" onPointerEnter={warmCalendlyConnection} onFocus={warmCalendlyConnection} onClick={() => { warmCalendlyConnection(); setCalendarRequested(true); }}>
+                View available times
+              </button>
+            </div>
+          )}
+          {calendarRequested && <a className="calendly-direct-link" href={calendlyUrl} target="_blank" rel="noreferrer">Prefer a new tab? Open Calendly directly</a>}
         </div>
       </div>
     </section>

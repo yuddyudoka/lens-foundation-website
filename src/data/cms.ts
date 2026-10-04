@@ -130,6 +130,34 @@ const apiCollectionByStorageKey: Partial<Record<string, CmsCollectionName>> = {
 
 const remoteSaveState = new Map<string, { latest: unknown[]; inFlight: boolean }>();
 
+const optimizedAssetPaths: Record<string, string> = {
+  "/assets/hero-team-1.jpg": "/assets/hero-team-1-v1.webp",
+  "/assets/impact-community.jpg": "/assets/impact-community-v1.webp",
+  "/assets/impact-outreach.jpg": "/assets/impact-outreach-v1.webp",
+  "/assets/volunteer-cta-background.png": "/assets/volunteer-cta-background-v1.webp",
+  "/assets/about-page-hero.png": "/assets/about-page-hero-v1.webp",
+  "/assets/events-page-hero.png": "/assets/events-page-hero-v1.webp",
+  "/assets/podium-skills.png": "/assets/podium-skills-v1.webp",
+  "/assets/podium-training.png": "/assets/podium-training-v1.webp",
+  "/assets/podium-inclusive.png": "/assets/podium-inclusive-v1.webp",
+  "/assets/volunteer-hero.png": "/assets/volunteer-hero-v1.webp",
+  "/assets/partner-hero.png": "/assets/partner-hero-v1.webp",
+  "/assets/contact-hero.png": "/assets/contact-hero-v1.webp",
+  "/assets/team-omobolanle-sodiya.jpg": "/assets/team-omobolanle-sodiya-v1.webp",
+  "/assets/team-ayobami-johnson.jpg": "/assets/team-ayobami-johnson-v1.webp",
+  "/assets/team-joy-dada.png": "/assets/team-joy-dada-v1.webp",
+  "/assets/team-michael-gbademu.png": "/assets/team-michael-gbademu-v1.webp",
+  "/assets/team-ubaka-amen.png": "/assets/team-ubaka-amen-v1.webp",
+  "/assets/testimonial-chijioke-v2.png": "/assets/testimonial-chijioke-v2-v1.webp",
+  "/assets/testimonial-ngozi-v2.png": "/assets/testimonial-ngozi-v2-v1.webp",
+  "/assets/testimonial-emeka-v2.png": "/assets/testimonial-emeka-v2-v1.webp",
+  "/assets/testimonial-ifeoma-v2.png": "/assets/testimonial-ifeoma-v2-v1.webp",
+  "/assets/testimonial-tunde-v2.png": "/assets/testimonial-tunde-v2-v1.webp",
+  "/assets/testimonial-kemi-v2.png": "/assets/testimonial-kemi-v2-v1.webp",
+};
+
+export const getOptimizedAssetPath = (path: string) => optimizedAssetPaths[path] ?? path;
+
 function queueRemoteSave(key: string, value: unknown[]) {
   if (typeof window === "undefined") return;
   const collection = apiCollectionByStorageKey[key];
@@ -231,7 +259,10 @@ const testimonialImageUpgrades: Record<string, string> = {
   "/assets/testimonial-kemi.png": "/assets/testimonial-kemi-v2.png",
 };
 export const getTestimonials = () => readCollection(storageKeys.testimonials, defaultTestimonials)
-  .map((testimonial) => ({ ...testimonial, image: testimonialImageUpgrades[testimonial.image] ?? testimonial.image }));
+  .map((testimonial) => {
+    const upgraded = testimonialImageUpgrades[testimonial.image] ?? testimonial.image;
+    return { ...testimonial, image: getOptimizedAssetPath(upgraded) };
+  });
 export const saveTestimonials = (records: TestimonialRecord[]) => saveCollection(storageKeys.testimonials, records);
 export const getFaqs = () => {
   if (typeof window === "undefined") return defaultFaqs;
@@ -275,16 +306,19 @@ export const getSiteImages = () => readCollection(storageKeys.siteImages, defaul
   // Refresh only untouched legacy defaults; preserve admin-uploaded images and custom focal points.
   const isUntouchedLegacyDefault = previous.some((legacy) => record.image === legacy.image && record.focalPoint?.x === 50 && record.focalPoint.y === legacy.y);
   if (isUntouchedLegacyDefault && updatedDefault) {
-    return { ...record, image: updatedDefault.image, alt: updatedDefault.alt, focalPoint: updatedDefault.focalPoint };
+    return { ...record, image: getOptimizedAssetPath(updatedDefault.image), alt: updatedDefault.alt, focalPoint: updatedDefault.focalPoint };
   }
-  return { ...record, focalPoint: record.focalPoint ?? { x: 50, y: 50 } };
+  return { ...record, image: getOptimizedAssetPath(record.image), focalPoint: record.focalPoint ?? { x: 50, y: 50 } };
 });
-export const getSiteImage = (id: string) => getSiteImages().find((record) => record.id === id) ?? defaultSiteImages.find((record) => record.id === id)!;
+export const getSiteImage = (id: string) => getSiteImages().find((record) => record.id === id) ?? (() => {
+  const fallback = defaultSiteImages.find((record) => record.id === id)!;
+  return { ...fallback, image: getOptimizedAssetPath(fallback.image) };
+})();
 export const saveSiteImages = (records: SiteImageRecord[]) => saveCollection(storageKeys.siteImages, records);
 export const getTeamMembers = () => readCollection(storageKeys.team, defaultTeamMembers).map((record) => {
   const isEmptyPlaceholder = record.name === "Team member" && record.role === "Profile coming soon" && !record.image;
-  if (isEmptyPlaceholder && record.id === "team-member-5") return defaultTeamMembers[4];
-  if (isEmptyPlaceholder && record.id === "team-member-6") return defaultTeamMembers[5];
-  return { ...record, focalPoint: record.focalPoint ?? { x: 50, y: 50 } };
+  if (isEmptyPlaceholder && record.id === "team-member-5") return { ...defaultTeamMembers[4], image: getOptimizedAssetPath(defaultTeamMembers[4].image) };
+  if (isEmptyPlaceholder && record.id === "team-member-6") return { ...defaultTeamMembers[5], image: getOptimizedAssetPath(defaultTeamMembers[5].image) };
+  return { ...record, image: getOptimizedAssetPath(record.image), focalPoint: record.focalPoint ?? { x: 50, y: 50 } };
 });
 export const saveTeamMembers = (records: TeamMemberRecord[]) => saveCollection(storageKeys.team, records.slice(0, 6));
