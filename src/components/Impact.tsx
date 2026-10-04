@@ -57,7 +57,12 @@ export function Impact() {
             </article>
 
             <figure className="impact-card impact-photo-card">
-              <img src={communityImage.image} alt={communityImage.alt} loading="lazy" />
+              <img
+                src={communityImage.image}
+                alt={communityImage.alt}
+                loading="lazy"
+                style={{ objectPosition: `${communityImage.focalPoint.x}% ${communityImage.focalPoint.y}%` }}
+              />
             </figure>
           </div>
 

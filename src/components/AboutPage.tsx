@@ -65,10 +65,10 @@ function OurStoryVideo() {
 }
 
 const impactStats: Array<{ value: number; decimals: number; prefix?: string; suffix?: string; label: string }> = [
-  { value: 3.45, decimals: 2, prefix: "₦", suffix: "M", label: "invested in community outreach" },
-  { value: 300, decimals: 0, suffix: "+", label: "households reached with practical support" },
-  { value: 4, decimals: 0, label: "active chapters connecting our communities" },
-  { value: 6, decimals: 0, label: "core values guiding every action" },
+  { value: 3.5, decimals: 1, prefix: "₦", suffix: "M+", label: "Spent on Outreach" },
+  { value: 300, decimals: 0, suffix: "+", label: "Households reached" },
+  { value: 1, decimals: 0, prefix: "₦", suffix: "M+", label: "Food support Distributed" },
+  { value: 450, decimals: 0, prefix: "₦", suffix: "k+", label: "Direct Street Support" },
 ];
 
 function ImpactRibbon() {

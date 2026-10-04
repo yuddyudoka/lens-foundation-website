@@ -30,7 +30,7 @@
   text-rendering: optimizeLegibility;
   --primary: #007a91;
   --white: #fefefe;
-  --grey-on-dark: #bbbbbb;
+  --grey-on-dark: #dddddd;
   --content-gutter: 48px;
   --content-max: 1480px;
 }
@@ -860,8 +860,8 @@ button {
 }
 
 .impact-photo-card > img {
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: center 10%;
 }
 
 .impact-feature-card {
@@ -1028,7 +1028,7 @@ button {
 }
 
 .podium-hero-content p {
-  color: #e6f2f4;
+  color: #dddddd;
   font-size: 18px;
   line-height: 1.4;
   letter-spacing: -0.02em;
@@ -4027,7 +4027,7 @@ button {
 
 .contact-hero-content p {
   margin-bottom: 12px;
-  color: #e6f2f4;
+  color: #dddddd;
   font-size: 18px;
   line-height: 1.4;
   letter-spacing: -0.02em;
@@ -4428,36 +4428,6 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   gap: 16px;
 }
 
-.calendly-launch-card {
-  display: grid;
-  width: min(920px, 100%);
-  min-height: 190px;
-  padding: 30px;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 24px;
-  border-radius: 16px;
-  background: #eaf6f4;
-}
-
-.calendly-launch-mark {
-  display: grid;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #00333d;
-  color: #d7f3cb;
-  font-family: "Faculty Glyphic", sans-serif;
-  font-size: 28px;
-  place-items: center;
-}
-
-.calendly-launch-card h3,
-.calendly-launch-card p { margin: 0; }
-.calendly-launch-card h3 { margin-bottom: 7px; color: #00333d; font-size: 24px; font-weight: 500; letter-spacing: -0.03em; }
-.calendly-launch-card p { max-width: 56ch; color: #576669; font-size: 16px; line-height: 1.5; }
-.calendly-launch-button { min-width: 210px; white-space: nowrap; }
-
 .calendly-embed-shell {
   position: relative;
   width: min(1180px, 100%);
@@ -4558,8 +4528,6 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
     gap: 32px;
   }
 
-  .calendly-launch-card { grid-template-columns: auto 1fr; }
-  .calendly-launch-button { width: 100%; grid-column: 1 / -1; }
   .calendly-embed-shell { height: 820px; }
 
   a.contact-detail-row .contact-detail-copy strong {
@@ -4610,8 +4578,6 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
     font-size: 16px;
   }
 
-  .calendly-launch-card { grid-template-columns: 1fr; padding: 24px 18px; text-align: left; }
-  .calendly-launch-mark { width: 60px; height: 60px; font-size: 24px; }
   .calendly-embed-shell { height: 900px; border-radius: 14px; }
   .calendly-embed { min-width: 0; }
 }
@@ -4878,49 +4844,40 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
 
 .about-impact-ribbon-grid {
   display: grid;
-  min-height: 220px;
-  padding-block: 42px;
+  padding-block: 40px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: stretch;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: clamp(28px, 5vw, 92px);
 }
 
 .about-impact-ribbon article {
-  position: relative;
   display: flex;
   min-width: 0;
-  padding: 12px 30px;
+  padding: 0;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
   gap: 8px;
-}
-
-.about-impact-ribbon article:first-child { padding-left: 0; }
-.about-impact-ribbon article:last-child { padding-right: 0; }
-.about-impact-ribbon article + article::before {
-  position: absolute;
-  top: 12px;
-  bottom: 12px;
-  left: 0;
-  width: 1px;
-  background: rgb(215 243 203 / 34%);
-  content: "";
+  text-align: center;
 }
 
 .about-impact-ribbon strong {
+  width: 100%;
   font-family: "Faculty Glyphic", sans-serif;
-  font-size: clamp(40px, 4vw, 62px);
+  font-size: 48px;
   font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  line-height: 1.4;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
 
 .about-impact-ribbon p {
-  max-width: 24ch;
+  width: 100%;
   margin: 0;
-  color: #d8e8e9;
-  font-size: 16px;
+  color: #ffffff;
+  font-size: 18px;
   line-height: 1.4;
+  letter-spacing: -0.02em;
 }
 
 .about-values {
@@ -5211,13 +5168,10 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
 
   .about-impact-ribbon-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 36px 48px;
   }
 
-  .about-impact-ribbon article { min-height: 150px; padding: 24px; }
-  .about-impact-ribbon article:nth-child(odd) { padding-left: 0; }
-  .about-impact-ribbon article:nth-child(even) { padding-right: 0; }
-  .about-impact-ribbon article:nth-child(3)::before { display: none; }
-  .about-impact-ribbon article:nth-child(n + 3) { border-top: 1px solid rgb(215 243 203 / 34%); }
+  .about-impact-ribbon article { min-height: 118px; }
 
   .about-purpose-row {
     display: flex;
@@ -5287,12 +5241,11 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   .about-video-label strong { font-size: 17px; }
   .about-video-label small { font-size: 12px; }
 
-  .about-impact-ribbon-grid { grid-template-columns: 1fr; padding-block: 18px; }
+  .about-impact-ribbon-grid { grid-template-columns: 1fr; padding-block: 32px; gap: 28px; }
   .about-impact-ribbon article,
-  .about-impact-ribbon article:nth-child(n) { min-height: 124px; padding: 22px 0; border-top: 1px solid rgb(215 243 203 / 34%); }
-  .about-impact-ribbon article:first-child { border-top: 0; }
-  .about-impact-ribbon article + article::before { display: none; }
+  .about-impact-ribbon article:nth-child(n) { min-height: 0; padding: 0; border: 0; }
   .about-impact-ribbon strong { font-size: 42px; }
+  .about-impact-ribbon p { font-size: 16px; }
 
   .about-section-heading h2,
   .about-purpose-copy h2 {
@@ -5401,7 +5354,7 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
 
 .application-hero-content p {
   margin-bottom: 12px;
-  color: #e6f2f4;
+  color: #dddddd;
   font-size: 18px;
   line-height: 1.4;
   letter-spacing: -0.02em;
@@ -6103,7 +6056,7 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
 
 .events-page-hero-content p {
   margin-bottom: 12px;
-  color: #e6f2f4;
+  color: #dddddd;
   font-size: 18px;
   line-height: 1.4;
   letter-spacing: -0.02em;
