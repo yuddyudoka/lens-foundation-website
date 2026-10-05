@@ -248,18 +248,18 @@ function CommunityImpactOrganogram() {
         </header>
         <a
           className="about-organogram-image-link"
-          href="/assets/lens-foundation-organogram.png"
+          href="/assets/lens-foundation-operational-flow.png"
           target="_blank"
           rel="noreferrer"
           aria-label="Open the Lens Foundation community impact organogram at full resolution"
         >
           <img
             className="about-organogram-image"
-            src="/assets/lens-foundation-organogram.png"
-            alt="Lens Foundation community impact organogram showing vision and direction, community beneficiaries, partners and supporters, initiatives, projects, results, and accountability"
+            src="/assets/lens-foundation-operational-flow.png"
+            alt="Lens Foundation operational flow showing direction, partners and allies, programmes, community projects, people and communities, lasting impact, and accountability"
             loading="lazy"
-            width="4224"
-            height="2064"
+            width="5376"
+            height="3680"
           />
         </a>
       </div>
@@ -304,9 +304,15 @@ function OurTeam() {
   return (
     <section className="about-team" data-node-id="124:172" aria-labelledby="about-team-title">
       <div className="content-wrapper about-team-layout">
-        <header className="about-section-heading">
-          <p>The people behind the work</p>
-          <h2 id="about-team-title">Meet our team</h2>
+        <header className="about-team-heading-row">
+          <div className="about-section-heading">
+            <p>The people behind the work</p>
+            <h2 id="about-team-title">Meet our team</h2>
+          </div>
+          <div className="about-team-controls about-team-controls-desktop" aria-label="Team carousel controls">
+            <button type="button" onClick={() => moveRail(-1)} disabled={atStart} aria-label="Previous team members"><img className="about-team-arrow-previous" src="/assets/event-arrow-active.svg" alt="" /></button>
+            <button type="button" onClick={() => moveRail(1)} disabled={atEnd} aria-label="Next team members"><img src="/assets/event-arrow-active.svg" alt="" /></button>
+          </div>
         </header>
 
         <div
@@ -349,7 +355,7 @@ function OurTeam() {
             </article>
           ))}
         </div>
-        <div className="about-team-controls" aria-label="Team carousel controls">
+        <div className="about-team-controls about-team-controls-mobile" aria-label="Team carousel controls">
           <button type="button" onClick={() => moveRail(-1)} disabled={atStart} aria-label="Previous team members"><img className="about-team-arrow-previous" src="/assets/event-arrow-active.svg" alt="" /></button>
           <button type="button" onClick={() => moveRail(1)} disabled={atEnd} aria-label="Next team members"><img src="/assets/event-arrow-active.svg" alt="" /></button>
         </div>

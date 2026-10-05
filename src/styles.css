@@ -4844,6 +4844,7 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
 
 .about-impact-ribbon-grid {
   display: grid;
+  width: min(1164px, calc(100% - (var(--content-gutter) * 2)));
   padding-block: 40px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
@@ -5018,6 +5019,13 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   gap: 40px;
 }
 
+.about-team-heading-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
 .about-team-grid {
   display: flex;
   gap: 24px;
@@ -5071,6 +5079,8 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   align-items: center;
   gap: 16px;
 }
+
+.about-team-controls-mobile { display: none; }
 
 .about-team-controls button {
   width: 48px;
@@ -5290,6 +5300,13 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
   .about-team-layout {
     gap: 28px;
   }
+
+  .about-team-heading-row {
+    align-items: flex-start;
+  }
+
+  .about-team-controls-desktop { display: none; }
+  .about-team-controls-mobile { display: flex; }
 
   .about-team-grid {
     gap: 16px;
@@ -6712,34 +6729,50 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
 }
 
 .donation-modal {
-  display: flex;
+  position: relative;
   width: min(640px, 100%);
   height: 75vh;
   max-height: 75vh;
-  padding: 30px;
-  overflow-y: auto;
-  flex-direction: column;
-  gap: 22px;
+  overflow: hidden;
   border-radius: 22px;
   background: #ffffff;
   box-shadow: 0 18px 42px rgb(0 0 0 / 28%);
   color: #091f24;
   animation: donation-modal-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  scrollbar-width: thin;
-  scrollbar-color: #9bb7b3 transparent;
-  scrollbar-gutter: stable;
 }
 
-.donation-modal::-webkit-scrollbar { width: 10px; }
-.donation-modal::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
-.donation-modal::-webkit-scrollbar-track { margin-block: 18px; background: transparent; }
-.donation-modal::-webkit-scrollbar-thumb {
-  min-height: 72px;
-  border: 3px solid #ffffff;
+.donation-modal-scroll {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  overflow-y: auto;
+  flex-direction: column;
+  gap: 22px;
+  scrollbar-width: none;
+}
+
+.donation-modal-scroll::-webkit-scrollbar { display: none; }
+
+.donation-scrollbar {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  right: 6px;
+  bottom: 16px;
+  width: 6px;
+  pointer-events: none;
+  border-radius: 999px;
+  background: #edf4f3;
+}
+
+.donation-scrollbar span {
+  display: block;
+  width: 100%;
   border-radius: 999px;
   background: #83aba8;
+  transition: background-color 160ms ease;
 }
-.donation-modal::-webkit-scrollbar-thumb:hover { background: #497e7c; }
 
 .donation-modal h2,
 .donation-modal h3,
@@ -7024,11 +7057,20 @@ a.contact-detail-row:focus-visible .contact-detail-copy strong {
     width: 100%;
     height: auto;
     max-height: none;
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
+    animation: donation-sheet-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .donation-modal-scroll {
+    height: auto;
     padding: 24px 16px max(20px, env(safe-area-inset-bottom));
     overflow: hidden;
     gap: 16px;
-    border-radius: 24px 24px 0 0;
-    animation: donation-sheet-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .donation-scrollbar {
+    display: none;
   }
 
   .donation-modal-header {
