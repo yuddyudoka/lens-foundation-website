@@ -25,7 +25,7 @@ const VolunteerPage = lazy(() => import("./components/ApplicationPages").then((m
 const PartnerPage = lazy(() => import("./components/ApplicationPages").then((module) => ({ default: module.PartnerPage })));
 
 const siteUrl = "https://thelensfoundation.org";
-const defaultSocialImage = `${siteUrl}/assets/social-share-banner-v1.png`;
+const defaultSocialImage = "https://lens-foundation.4udoka.workers.dev/assets/social-share-banner-v1.png";
 
 const pageMetadata: Record<string, { title: string; description: string }> = {
   "": {
