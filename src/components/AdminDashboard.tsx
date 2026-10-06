@@ -262,7 +262,7 @@ export function AdminDashboard({ onLogout }: { onLogout?: () => void }) {
   return (
     <div className="admin-shell">
       <aside className={`admin-sidebar ${menuOpen ? "is-open" : ""}`}>
-        <a className="admin-brand" href="/" aria-label="Lens Foundation website"><img src="/assets/lens-logo.png" alt="" /><span><strong>Lens Foundation</strong><small>Content management</small></span></a>
+        <a className="admin-brand" href="/" aria-label="Lens Foundation website"><img src="/assets/lens-logo-192-v2.webp" width="192" height="192" alt="" /><span><strong>Lens Foundation</strong><small>Content management</small></span></a>
         <nav aria-label="Admin navigation">{navItems.map((item) => { const Icon = item.icon; return <button className={section === item.id ? "active" : ""} key={item.id} onClick={() => showSection(item.id)}><Icon size={20} weight={section === item.id ? "fill" : "regular"} /><span>{item.label}</span>{item.id !== "overview" && <small>{counts[item.id as keyof typeof counts]}</small>}</button>; })}</nav>
         <div className="admin-sidebar-footer"><div>LF</div><span><strong>Lens team</strong><small>Administrator</small></span>{onLogout && <button type="button" onClick={onLogout} aria-label="Sign out"><SignOut size={18} /></button>}</div>
       </aside>

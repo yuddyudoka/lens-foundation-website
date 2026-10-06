@@ -50,7 +50,7 @@ export function AdminAccess() {
 
   return <main className="admin-login-page">
     <section className="admin-login-card" aria-labelledby="admin-login-title">
-      <a href="/" className="admin-login-brand" aria-label="Return to The Lens Foundation homepage"><img src="/assets/lens-logo.png" alt="" /><span>The Lens Foundation</span></a>
+      <a href="/" className="admin-login-brand" aria-label="Return to The Lens Foundation homepage"><img src="/assets/lens-logo-192-v2.webp" width="192" height="192" alt="" /><span>The Lens Foundation</span></a>
       <div className="admin-login-icon"><LockKey size={28} weight="duotone" /></div>
       <h1 id="admin-login-title">Admin access</h1>
       <p>Enter the administrator password to manage website content.</p>

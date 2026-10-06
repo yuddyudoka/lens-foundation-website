@@ -91,14 +91,16 @@ export function LensValuesJourney() {
       const timelineProgress = railRect
         ? clamp((viewportFocus - railRect.top) / Math.max(railRect.height, 1))
         : 0;
+      const stepReveals = steps.map((step) => {
+        const stepRect = step.getBoundingClientRect();
+        return clamp((viewportHeight * 0.88 - stepRect.top) / (viewportHeight * 0.42));
+      });
 
       section.dataset.paletteActive = paletteIsActive ? "true" : "false";
       section.style.setProperty("--timeline-progress", timelineProgress.toFixed(4));
 
-      steps.forEach((step) => {
-        const stepRect = step.getBoundingClientRect();
-        const reveal = clamp((viewportHeight * 0.88 - stepRect.top) / (viewportHeight * 0.42));
-        step.style.setProperty("--step-reveal", reveal.toFixed(4));
+      steps.forEach((step, index) => {
+        step.style.setProperty("--step-reveal", stepReveals[index].toFixed(4));
       });
 
       section.dataset.motionReady = "true";

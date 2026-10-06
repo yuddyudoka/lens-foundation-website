@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { AnnualReports } from "./components/AnnualReports";
 import { Events } from "./components/Events";
 import { Faq } from "./components/Faq";
@@ -12,15 +12,17 @@ import { Navbar } from "./components/Navbar";
 import { OpportunitiesMarquee } from "./components/OpportunitiesMarquee";
 import { Testimonials } from "./components/Testimonials";
 import { VolunteerCta } from "./components/VolunteerCta";
-import { ContactPage } from "./components/ContactPage";
-import { PartnerPage, VolunteerPage } from "./components/ApplicationPages";
-import { EventsPage } from "./components/EventsPage";
-import { EventDetailPage } from "./components/EventDetailPage";
-import { AboutPage } from "./components/AboutPage";
 import { DonationModal } from "./components/DonationModal";
-import { LensPodiumPage } from "./components/LensPodiumPage";
-import { NotFoundPage } from "./components/NotFoundPage";
-import { AdminAccess } from "./components/AdminAccess";
+
+const AboutPage = lazy(() => import("./components/AboutPage").then((module) => ({ default: module.AboutPage })));
+const ContactPage = lazy(() => import("./components/ContactPage").then((module) => ({ default: module.ContactPage })));
+const EventsPage = lazy(() => import("./components/EventsPage").then((module) => ({ default: module.EventsPage })));
+const EventDetailPage = lazy(() => import("./components/EventDetailPage").then((module) => ({ default: module.EventDetailPage })));
+const LensPodiumPage = lazy(() => import("./components/LensPodiumPage").then((module) => ({ default: module.LensPodiumPage })));
+const NotFoundPage = lazy(() => import("./components/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
+const AdminAccess = lazy(() => import("./components/AdminAccess").then((module) => ({ default: module.AdminAccess })));
+const VolunteerPage = lazy(() => import("./components/ApplicationPages").then((module) => ({ default: module.VolunteerPage })));
+const PartnerPage = lazy(() => import("./components/ApplicationPages").then((module) => ({ default: module.PartnerPage })));
 
 const siteUrl = "https://thelensfoundation.org";
 const defaultSocialImage = `${siteUrl}/assets/about-page-hero-v1.webp`;
@@ -59,25 +61,6 @@ const pageMetadata: Record<string, { title: string; description: string }> = {
 function setMeta(selector: string, attribute: "content" | "href", value: string) {
   const element = document.head.querySelector<HTMLElement>(selector);
   if (element) element.setAttribute(attribute, value);
-}
-
-function HomeEmbedPreloads() {
-  return (
-    <div className="home-embed-preloads" aria-hidden="true">
-      <iframe
-        src="https://calendly.com/thelensfoundation/30min?embed_type=Inline&hide_gdpr_banner=1"
-        title="Calendly preload"
-        tabIndex={-1}
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
-      <iframe
-        src="https://www.youtube-nocookie.com/embed/-9kt-4WqOD0?rel=0&playsinline=1"
-        title="YouTube preload"
-        tabIndex={-1}
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
-    </div>
-  );
 }
 
 function CurrentPage() {
@@ -131,7 +114,6 @@ function CurrentPage() {
         <Faq />
         <FinalCta />
         <Footer />
-        <HomeEmbedPreloads />
       </main>
     );
   }
@@ -175,7 +157,9 @@ export default function App() {
 
   return (
     <>
-      <CurrentPage key={cmsHydrationRevision} />
+      <Suspense fallback={null}>
+        <CurrentPage key={cmsHydrationRevision} />
+      </Suspense>
       <DonationModal />
     </>
   );

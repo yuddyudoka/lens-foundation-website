@@ -1,9 +1,9 @@
 import { getSiteImage } from "../data/cms";
 
 const avatars = [
-  "/assets/impact-avatar-1.png",
-  "/assets/impact-avatar-2.png",
-  "/assets/impact-avatar-3.png",
+  "/assets/impact-avatar-1-96-v2.webp",
+  "/assets/impact-avatar-2-96-v2.webp",
+  "/assets/impact-avatar-3-96-v2.webp",
 ];
 
 export function Impact() {
@@ -43,7 +43,7 @@ export function Impact() {
               </div>
               <div className="impact-avatars" aria-label="Lens Foundation community members">
                 {avatars.map((avatar, index) => (
-                  <img key={avatar} src={avatar} alt={`Community member ${index + 1}`} />
+                  <img key={avatar} src={avatar} width="96" height="96" loading="lazy" decoding="async" alt={`Community member ${index + 1}`} />
                 ))}
               </div>
             </article>

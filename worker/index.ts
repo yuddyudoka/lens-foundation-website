@@ -339,15 +339,16 @@ export default {
     }
     if (!response.ok) return response;
     const headers = new Headers(response.headers);
-    if (["/robots.txt", "/sitemap.xml", "/llms.txt"].includes(pathname)) {
+    if (["/robots.txt", "/sitemap.xml", "/llms.txt", "/.well-known/ai-catalog.json", "/.well-known/ard.json"].includes(pathname)) {
       headers.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
       return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
     }
-    if (!pathname.startsWith("/assets/")) return response;
-    const versioned = /(?:-v\d+|index-[A-Za-z0-9_-]+)\.[^.]+$/.test(pathname);
-    headers.set("Cache-Control", versioned
-      ? "public, max-age=31536000, immutable"
-      : "public, max-age=86400, stale-while-revalidate=604800");
+    if (!pathname.startsWith("/assets/") && !pathname.startsWith("/fonts/")) {
+      headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+      headers.set("Cloudflare-CDN-Cache-Control", "public, max-age=300, stale-while-revalidate=86400");
+      return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+    }
+    headers.set("Cache-Control", "public, max-age=31536000, immutable");
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   },
 };

@@ -61,7 +61,7 @@ export function Navbar({ solid = false }: { solid?: boolean }) {
       <header className={`site-header${scrolled ? " is-scrolled" : ""}${solid ? " is-solid" : ""}`} data-node-id="15:203">
       <div className="content-wrapper nav-layout">
         <a className="brand" href="/" aria-label="The Lens Foundation home">
-          <img src="/assets/lens-logo.png" alt="The Lens Foundation" />
+          <img src="/assets/lens-logo-192-v2.webp" width="192" height="192" alt="The Lens Foundation" />
         </a>
 
         <nav className="desktop-nav" aria-label="Primary navigation">

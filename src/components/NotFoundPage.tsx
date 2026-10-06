@@ -51,7 +51,7 @@ export function NotFoundPage({
           <div className="not-found-visual" aria-hidden="true">
             <span className="not-found-number">404</span>
             <span className="not-found-logo-ring">
-              <img src="/assets/lens-logo.png" alt="" />
+              <img src="/assets/lens-logo-192-v2.webp" width="192" height="192" alt="" />
             </span>
           </div>
         </section>
