@@ -61,10 +61,15 @@ export function Footer() {
                 <img src="/assets/footer-phone.svg" alt="" />
                 <span>+234-909-644-5566</span>
               </a>
-              <address>
+              <a
+                href="https://maps.google.com/?q=Peter+Oki+Street+Lagos+105102+Nigeria"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open Peter Oki Street, Lagos in Google Maps"
+              >
                 <img src="/assets/footer-location.svg" alt="" />
                 <span>Peter Oki St, Lagos 105102, Lagos</span>
-              </address>
+              </a>
             </div>
           </div>
         </div>
