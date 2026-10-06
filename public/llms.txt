@@ -1,0 +1,19 @@
+# The Lens Foundation
+
+> The Lens Foundation is a community-focused nonprofit that turns compassion into practical support for children, families, and underserved communities through outreach, education support, food assistance, healthcare support, direct aid, and partnerships.
+
+## Main pages
+
+- [Home](https://thelensfoundation.org/): Overview of the foundation, current impact, events, reports, testimonials, and frequently asked questions.
+- [About Us](https://thelensfoundation.org/about): Mission, vision, values, operational flow, founder message, and team.
+- [Events](https://thelensfoundation.org/events): Upcoming and completed community events across Lens Foundation chapters.
+- [LENS the Podium](https://thelensfoundation.org/lens-podium): Youth public-speaking and leadership programme for participants aged 11 to 19.
+- [Volunteer](https://thelensfoundation.org/volunteer): Volunteer application and participation information.
+- [Partner](https://thelensfoundation.org/partner): Partnership opportunities and application form.
+- [Contact](https://thelensfoundation.org/contact): Contact details, enquiry form, and meeting booking.
+
+## Contact
+
+- Email: Info@thelensfoundation.org
+- Phone: +234 909 644 5566
+- Address: Peter Oki Street, Lagos 105102, Nigeria

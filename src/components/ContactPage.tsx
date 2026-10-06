@@ -228,8 +228,6 @@ function ContactInformation() {
 }
 
 function CalendlySection() {
-  const [calendarReady, setCalendarReady] = useState(false);
-
   useEffect(() => {
     if (document.querySelector('link[data-calendly-preconnect="true"]')) return;
     for (const href of ["https://calendly.com", "https://assets.calendly.com"]) {
@@ -250,13 +248,14 @@ function CalendlySection() {
           <p>Book a meeting with our team. We are happy to share more about our work, programmes, partnerships, and ways to get involved.</p>
         </div>
         <div className="calendly-booking">
-          <div className="calendly-embed-shell" data-ready={calendarReady}>
-            {!calendarReady && <div className="calendly-loading" role="status"><span /><p>Loading available meeting times…</p></div>}
+          <div className="calendly-embed-shell">
             <iframe
               className="calendly-embed"
               src={`${calendlyUrl}?embed_type=Inline&hide_gdpr_banner=1`}
               title="Book a 30-minute meeting with Lens Foundation"
-              onLoad={() => setCalendarReady(true)}
+              loading="lazy"
+              scrolling="no"
+              referrerPolicy="strict-origin-when-cross-origin"
             />
           </div>
           <a className="calendly-direct-link" href={calendlyUrl} target="_blank" rel="noreferrer">Prefer a new tab? Open Calendly directly</a>

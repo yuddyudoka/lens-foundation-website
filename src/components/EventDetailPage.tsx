@@ -19,6 +19,46 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
     return () => { active = false; };
   }, [eventId]);
 
+  useEffect(() => {
+    if (!event) return;
+
+    const details = getEventDetails(event);
+    const canonicalUrl = `https://thelensfoundation.org/events/${encodeURIComponent(event.id)}`;
+    const title = `${event.title} | The Lens Foundation`;
+    const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const canonicalLink = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    const socialTags = [
+      document.querySelector<HTMLMetaElement>('meta[property="og:title"]'),
+      document.querySelector<HTMLMetaElement>('meta[property="og:description"]'),
+      document.querySelector<HTMLMetaElement>('meta[property="og:url"]'),
+      document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]'),
+      document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]'),
+    ];
+    const previousTitle = document.title;
+    const previousDescription = descriptionMeta?.content;
+    const previousCanonical = canonicalLink?.href;
+    const previousSocialValues = socialTags.map((tag) => tag?.content);
+
+    document.title = title;
+    if (descriptionMeta) descriptionMeta.content = details.summary;
+    if (canonicalLink) canonicalLink.href = canonicalUrl;
+    if (socialTags[0]) socialTags[0].content = title;
+    if (socialTags[1]) socialTags[1].content = details.summary;
+    if (socialTags[2]) socialTags[2].content = canonicalUrl;
+    if (socialTags[3]) socialTags[3].content = title;
+    if (socialTags[4]) socialTags[4].content = details.summary;
+
+    return () => {
+      document.title = previousTitle;
+      if (descriptionMeta && previousDescription !== undefined) descriptionMeta.content = previousDescription;
+      if (canonicalLink && previousCanonical !== undefined) canonicalLink.href = previousCanonical;
+      socialTags.forEach((tag, index) => {
+        const value = previousSocialValues[index];
+        if (tag && value !== undefined) tag.content = value;
+      });
+    };
+  }, [event]);
+
   if (!event) return <EventNotFound />;
 
   const details = getEventDetails(event);

@@ -334,8 +334,16 @@ export default {
     if (apiResponse) return apiResponse;
     if (pathname.startsWith("/api/")) return json({ error: "Not found." }, 404);
     const response = await env.ASSETS.fetch(request);
-    if (!pathname.startsWith("/assets/") || !response.ok) return response;
+    if (pathname.startsWith("/.well-known/") && response.headers.get("Content-Type")?.includes("text/html")) {
+      return json({ error: "Not found." }, 404);
+    }
+    if (!response.ok) return response;
     const headers = new Headers(response.headers);
+    if (["/robots.txt", "/sitemap.xml", "/llms.txt"].includes(pathname)) {
+      headers.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+      return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+    }
+    if (!pathname.startsWith("/assets/")) return response;
     const versioned = /(?:-v\d+|index-[A-Za-z0-9_-]+)\.[^.]+$/.test(pathname);
     headers.set("Cache-Control", versioned
       ? "public, max-age=31536000, immutable"

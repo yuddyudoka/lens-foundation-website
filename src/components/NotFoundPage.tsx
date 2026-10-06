@@ -13,9 +13,25 @@ export function NotFoundPage({
 }: NotFoundPageProps = {}) {
   useEffect(() => {
     const previousTitle = document.title;
+    const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const robotsMeta = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    const canonicalLink = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    const previousDescription = descriptionMeta?.content;
+    const previousRobots = robotsMeta?.content;
+    const previousCanonical = canonicalLink?.href;
+
     document.title = "Page not found | The Lens Foundation";
-    return () => { document.title = previousTitle; };
-  }, []);
+    if (descriptionMeta) descriptionMeta.content = description;
+    if (robotsMeta) robotsMeta.content = "noindex, nofollow";
+    if (canonicalLink) canonicalLink.href = window.location.href;
+
+    return () => {
+      document.title = previousTitle;
+      if (descriptionMeta && previousDescription !== undefined) descriptionMeta.content = previousDescription;
+      if (robotsMeta && previousRobots !== undefined) robotsMeta.content = previousRobots;
+      if (canonicalLink && previousCanonical !== undefined) canonicalLink.href = previousCanonical;
+    };
+  }, [description]);
 
   return (
     <>

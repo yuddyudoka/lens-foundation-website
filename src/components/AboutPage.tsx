@@ -19,19 +19,6 @@ function AboutHero() {
 }
 
 function OurStoryVideo() {
-  const [playing, setPlaying] = useState(false);
-  const warmYouTubeConnection = () => {
-    if (document.querySelector('link[data-youtube-preconnect="true"]')) return;
-    for (const href of ["https://www.youtube-nocookie.com", "https://i.ytimg.com"]) {
-      const link = document.createElement("link");
-      link.rel = "preconnect";
-      link.href = href;
-      link.crossOrigin = "anonymous";
-      link.dataset.youtubePreconnect = "true";
-      document.head.append(link);
-    }
-  };
-
   return (
     <section className="about-story" data-node-id="124:82" aria-labelledby="about-story-title">
       <div className="content-wrapper about-story-layout">
@@ -39,25 +26,14 @@ function OurStoryVideo() {
           <p>Our story</p>
           <h2 id="about-story-title">How compassion grew into shared action</h2>
         </header>
-        <div className="about-video-frame" data-playing={playing}>
-          {playing ? (
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/-9kt-4WqOD0?rel=0&playsinline=1&autoplay=1"
-              title="Lens Foundation — Indigenous Welcome"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
-          ) : (
-            <button className="about-video-poster" type="button" onPointerEnter={warmYouTubeConnection} onFocus={warmYouTubeConnection} onClick={() => { warmYouTubeConnection(); setPlaying(true); }} aria-label="Play the Lens Foundation story video">
-              <img src="/assets/about-page-hero-v1.webp" alt="Lens Foundation team members at a community event" />
-              <span className="about-video-poster-overlay" aria-hidden="true" />
-              <span className="about-video-play" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M8.25 5.8v12.4L18 12 8.25 5.8Z" fill="currentColor" /></svg>
-              </span>
-              <span className="about-video-label"><strong>Watch our story</strong><small>Video loads when you press play</small></span>
-            </button>
-          )}
+        <div className="about-video-frame">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/-9kt-4WqOD0?rel=0&playsinline=1"
+            title="Lens Foundation — Indigenous Welcome"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
         </div>
       </div>
     </section>
@@ -215,7 +191,7 @@ function FounderMessage() {
   return (
     <section className="about-founder" data-node-id="124:130" aria-labelledby="about-founder-title">
       <div className="content-wrapper about-founder-layout">
-        <img className="about-founder-portrait" src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
+        <img className="about-founder-portrait" src={image.image} alt={image.alt} loading="lazy" style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
         <div className="about-founder-copy">
           <p className="about-founder-kicker">A message from the founder</p>
           <h2 id="about-founder-title">A shared concern became a promise to serve with compassion</h2>
