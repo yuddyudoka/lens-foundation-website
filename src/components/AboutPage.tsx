@@ -3,18 +3,16 @@ import { getSiteImage, getTeamMembers } from "../data/cms";
 import { Footer } from "./Footer";
 import { FinalCta } from "./FinalCta";
 import { Navbar } from "./Navbar";
+import { PageIntro } from "./PageIntro";
 
 function AboutHero() {
-  const image = getSiteImage("about-hero");
   return (
-    <section className="about-hero" data-node-id="124:64" aria-labelledby="about-page-title">
-      <img className="about-hero-image" src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
-      <div className="about-hero-overlay" aria-hidden="true" />
-      <div className="content-wrapper about-hero-content">
-        <p>~ABOUT US~</p>
-        <h1 id="about-page-title">Leading with Compassion. Supporting Brighter Tomorrows</h1>
-      </div>
-    </section>
+    <PageIntro
+      eyebrow="About us"
+      title="Leading with compassion. Supporting brighter tomorrows."
+      titleId="about-page-title"
+      nodeId="124:64"
+    />
   );
 }
 
@@ -41,10 +39,10 @@ function OurStoryVideo() {
 }
 
 const impactStats: Array<{ value: number; decimals: number; prefix?: string; suffix?: string; label: string }> = [
-  { value: 3.5, decimals: 1, prefix: "₦", suffix: "M+", label: "Spent on Outreach" },
-  { value: 300, decimals: 0, suffix: "+", label: "Households reached" },
-  { value: 1, decimals: 0, prefix: "₦", suffix: "M+", label: "Food support Distributed" },
-  { value: 450, decimals: 0, prefix: "₦", suffix: "k+", label: "Direct Street Support" },
+  { value: 10, decimals: 0, prefix: "₦", suffix: "M+", label: "Invested in Community Impact" },
+  { value: 300, decimals: 0, suffix: "+", label: "Households Reached" },
+  { value: 5, decimals: 0, suffix: "+", label: "Children Receiving Ongoing Educational Support" },
+  { value: 7, decimals: 0, suffix: "+", label: "Individuals Economically Empowered" },
 ];
 
 function ImpactRibbon() {
@@ -343,7 +341,7 @@ function OurTeam() {
 export function AboutPage() {
   return (
     <>
-      <Navbar />
+      <Navbar solid />
       <main className="about-page">
         <AboutHero />
         <OurStoryVideo />

@@ -88,7 +88,7 @@ export function PodiumApplicationForm() {
             {isMinor && (
               <label className="podium-consent-card">
                 <input type="checkbox" name="guardianConsent" value="Confirmed" required />
-                <span><strong>Parent or guardian consent</strong>I confirm that I am the legal guardian of the participant named above and give permission for them to apply to and, if selected, participate in LENS the Podium.</span>
+                <span><strong>Parent/Guardian Consent</strong>I confirm that I am the legal guardian of the participant named above and give permission for them to apply to and if selected, participate in LENS the Podium.</span>
               </label>
             )}
             <label className="podium-consent-card">

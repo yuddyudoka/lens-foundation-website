@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { getSiteImage } from "../data/cms";
 import { submitSiteForm } from "../data/formSubmission";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
+import { PageIntro } from "./PageIntro";
 
 const contactDetails = [
   {
@@ -45,16 +45,13 @@ function RequiredMark() {
 }
 
 function ContactHero() {
-  const image = getSiteImage("contact-hero");
   return (
-    <section className="contact-hero" data-node-id="209:3298" aria-labelledby="contact-page-title">
-      <img className="contact-hero-image" src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
-      <div className="contact-hero-overlay" aria-hidden="true" />
-      <div className="content-wrapper contact-hero-content">
-        <p>~CONTACT US~</p>
-        <h1 id="contact-page-title">We’d Love To Hear From You</h1>
-      </div>
-    </section>
+    <PageIntro
+      eyebrow="Contact us"
+      title="We’d love to hear from you."
+      titleId="contact-page-title"
+      nodeId="209:3298"
+    />
   );
 }
 
@@ -268,7 +265,7 @@ function CalendlySection() {
 export function ContactPage() {
   return (
     <>
-      <Navbar />
+      <Navbar solid />
       <main className="contact-page">
         <ContactHero />
         <ContactInformation />

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
-import { getSiteImage } from "../data/cms";
 import { submitSiteForm } from "../data/formSubmission";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
+import { PageIntro } from "./PageIntro";
 
 type FieldProps = {
   label: string;
@@ -132,28 +132,16 @@ export function SectionHeading({ number, total, title, description }: { number: 
 function ApplicationHero({
   eyebrow,
   title,
-  image,
   imageClass,
   nodeId,
-  imageId,
 }: {
   eyebrow: string;
   title: string;
-  image: string;
   imageClass: string;
   nodeId: string;
-  imageId: string;
 }) {
-  const managedImage = getSiteImage(imageId);
   return (
-    <section className="application-hero" data-node-id={nodeId} aria-labelledby={`${imageClass}-title`}>
-      <img className={`application-hero-image ${imageClass}`} src={managedImage?.image ?? image} alt={managedImage?.alt ?? "Lens Foundation community outreach participants"} style={{ objectPosition: `${managedImage?.focalPoint.x ?? 50}% ${managedImage?.focalPoint.y ?? 50}%` }} />
-      <div className="application-hero-overlay" aria-hidden="true" />
-      <div className="content-wrapper application-hero-content">
-        <p>{eyebrow}</p>
-        <h1 id={`${imageClass}-title`}>{title}</h1>
-      </div>
-    </section>
+    <PageIntro eyebrow={eyebrow} title={title} titleId={`${imageClass}-title`} nodeId={nodeId} />
   );
 }
 
@@ -364,13 +352,11 @@ function PartnerForm() {
 export function VolunteerPage() {
   return (
     <>
-      <Navbar />
+      <Navbar solid />
       <main className="application-page">
         <ApplicationHero
-          eyebrow="~VOLUNTEER~"
+          eyebrow="Volunteer"
           title="Give your time. Help turn compassion into action."
-          image="/assets/volunteer-hero-v1.webp"
-          imageId="volunteer-hero"
           imageClass="volunteer-hero-image"
           nodeId="201:2960"
         />
@@ -384,13 +370,11 @@ export function VolunteerPage() {
 export function PartnerPage() {
   return (
     <>
-      <Navbar />
+      <Navbar solid />
       <main className="application-page">
         <ApplicationHero
-          eyebrow="~PARTNERSHIP~"
+          eyebrow="Partnership"
           title="Bring your resources closer to real community needs."
-          image="/assets/partner-hero-v1.webp"
-          imageId="partner-hero"
           imageClass="partner-hero-image"
           nodeId="201:2929"
         />

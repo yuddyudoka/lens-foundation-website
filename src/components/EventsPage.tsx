@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getSiteImage } from "../data/cms";
 import { fallbackEvents, filterEvents, loadEvents, type ChapterFilter, type EventFilter, type EventRecord } from "../data/events";
 import { FinalCta } from "./FinalCta";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
+import { PageIntro } from "./PageIntro";
 
 const chapters: { value: ChapterFilter; label: string }[] = [
   { value: "All", label: "All" },
@@ -15,16 +15,13 @@ const chapters: { value: ChapterFilter; label: string }[] = [
 const filters: EventFilter[] = ["All", "Upcoming", "Completed"];
 
 function EventsHero() {
-  const image = getSiteImage("events-hero");
   return (
-    <section className="events-page-hero" data-node-id="464:2211" aria-labelledby="events-page-title">
-      <img src={image.image} alt={image.alt} style={{ objectPosition: `${image.focalPoint.x}% ${image.focalPoint.y}%` }} />
-      <div className="events-page-hero-overlay" aria-hidden="true" />
-      <div className="content-wrapper events-page-hero-content">
-        <p>~EVENTS~</p>
-        <h1 id="events-page-title">We Gather With Purpose</h1>
-      </div>
-    </section>
+    <PageIntro
+      eyebrow="Events"
+      title="We gather with purpose."
+      titleId="events-page-title"
+      nodeId="464:2211"
+    />
   );
 }
 
@@ -166,7 +163,7 @@ function EventsListing() {
 export function EventsPage() {
   return (
     <>
-      <Navbar />
+      <Navbar solid />
       <main className="events-page">
         <EventsHero />
         <EventsListing />

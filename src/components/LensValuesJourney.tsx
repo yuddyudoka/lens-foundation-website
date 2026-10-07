@@ -12,7 +12,7 @@ type LensValue = {
 const values: LensValue[] = [
   {
     number: "01",
-    title: "L - Leadership",
+    title: "L - Leading",
     description:
       "Developing confident, purpose-driven young people with the knowledge, skills and opportunities to lead.",
     image: "/assets/lens-summary/leadership.webp",
@@ -21,7 +21,7 @@ const values: LensValue[] = [
   },
   {
     number: "02",
-    title: "E - Empowerment",
+    title: "E - Empowering",
     description:
       "Equipping individuals with practical resources and opportunities to build sustainable livelihoods.",
     image: "/assets/lens-summary/empowerment.webp",

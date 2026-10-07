@@ -3,6 +3,7 @@ import { fallbackEvents, getEventDetails, loadEvents, type EventRecord } from ".
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 import { NotFoundPage } from "./NotFoundPage";
+import { PageIntro } from "./PageIntro";
 
 function EventNotFound() {
   return <NotFoundPage title="This event could not be found." description="The event may have moved or is no longer available. Explore our current events and completed community projects instead." />;
@@ -68,6 +69,7 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
     <>
       <Navbar solid />
       <main className="event-detail-page" data-node-id="196:1012">
+        <PageIntro eyebrow="Event" title={event.title} titleId="event-detail-title" />
         <div className="content-wrapper event-detail-layout">
           <nav className="event-detail-breadcrumb" aria-label="Breadcrumb">
             <a href="/events">Events</a>
@@ -76,7 +78,6 @@ export function EventDetailPage({ eventId }: { eventId: string }) {
           </nav>
 
           <header className="event-detail-header">
-            <h1>{event.title}</h1>
             <p>{details.summary}</p>
           </header>
 
